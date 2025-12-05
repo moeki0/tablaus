@@ -11,6 +11,47 @@ import _ from "lodash";
 import { addDays, format, isValid, parse } from "date-fns";
 import * as autosizeInput from "autosize-input";
 
+const dateFormats = [
+  { pattern: "yyyy/MM/dd", output: "yyyy/MM/dd", matcher: /^\d{4}\/\d{2}\/\d{2}$/ },
+  { pattern: "yyyy/M/d", output: "yyyy/M/d", matcher: /^\d{4}\/\d{1,2}\/\d{1,2}$/ },
+  { pattern: "yyyy-MM-dd", output: "yyyy-MM-dd", matcher: /^\d{4}-\d{2}-\d{2}$/ },
+  { pattern: "yyyy-M-d", output: "yyyy-M-d", matcher: /^\d{4}-\d{1,2}-\d{1,2}$/ },
+  { pattern: "yyyy.MM.dd", output: "yyyy.MM.dd", matcher: /^\d{4}\.\d{2}\.\d{2}$/ },
+  { pattern: "yyyy.M.d", output: "yyyy.M.d", matcher: /^\d{4}\.\d{1,2}\.\d{1,2}$/ },
+  { pattern: "yyyyMMdd", output: "yyyyMMdd", matcher: /^\d{8}$/ },
+  { pattern: "M/d/yy", output: "M/d/yy", matcher: /^\d{1,2}\/\d{1,2}\/\d{2}$/ },
+  { pattern: "M/d", output: "M/d", matcher: /^\d{1,2}\/\d{1,2}$/ },
+  { pattern: "M-d", output: "M-d", matcher: /^\d{1,2}-\d{1,2}$/ },
+  { pattern: "M.d", output: "M.d", matcher: /^\d{1,2}\.\d{1,2}$/ },
+  { pattern: "yyyy年M月d日", output: "yyyy年M月d日", matcher: /^\d{4}年\d{1,2}月\d{1,2}日$/ },
+  { pattern: "M月d日", output: "M月d日", matcher: /^\d{1,2}月\d{1,2}日$/ },
+] as const;
+
+const parseDateValue = (value: string): { date: Date; output: string } | null => {
+  const trimmed = value.trim();
+  for (const { pattern, output, matcher } of dateFormats) {
+    if (matcher && !matcher.test(trimmed)) {
+      continue;
+    }
+    const parsed = parse(trimmed, pattern, new Date());
+    if (isValid(parsed)) {
+      return { date: parsed, output };
+    }
+  }
+  const autoParsed = new Date(trimmed);
+  if (isValid(autoParsed)) {
+    const fallbackFormat = trimmed.includes("-")
+      ? "yyyy-MM-dd"
+      : trimmed.includes(".")
+        ? "yyyy.MM.dd"
+        : trimmed.includes("年")
+          ? "yyyy年M月d日"
+          : "yyyy/MM/dd";
+    return { date: autoParsed, output: fallbackFormat };
+  }
+  return null;
+};
+
 export function Cell({
   value,
   i,
@@ -38,11 +79,11 @@ export function Cell({
     if (!v) {
       return null;
     }
-    const parsed = parse(v, "yyyy/MM/dd", new Date());
-    if (!isValid(parsed)) {
+    const parsed = parseDateValue(v);
+    if (!parsed) {
       return null;
     }
-    return format(addDays(parsed, 1), "yyyy/MM/dd");
+    return format(addDays(parsed.date, 1), parsed.output);
   }, [i, j, rows]);
   const allValues = useMemo(() => {
     let v = values.filter((v) => v);
