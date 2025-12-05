@@ -2,7 +2,7 @@
 "use client";
 
 import { useAtom } from "jotai";
-import { columnAtom, rowAtom } from "./atoms";
+import { columnAtom, footerAtom, rowAtom } from "./atoms";
 import { RefObject, useEffect } from "react";
 import { Column } from "./table";
 import * as autosizeInput from "autosize-input";
@@ -20,6 +20,7 @@ export function Header({
 }) {
   const [, setColumns] = useAtom(columnAtom);
   const [, setRows] = useAtom(rowAtom);
+  const [, setFooters] = useAtom(footerAtom);
 
   useEffect(() => {
     colsRef.current[i]?.focus();
@@ -62,6 +63,9 @@ export function Header({
                 r.values = [...r.values, ""];
                 return r;
               });
+            });
+            setFooters((footers) => {
+              return [...footers, ""];
             });
           }
         }}

@@ -10,3 +10,5 @@ export const rowAtom = atom([
 ]);
 
 export const columnAtom = atom(["Done", "Title", "Due"]);
+
+export const footerAtom = atom(["count(\"はい\")", "", ""])

@@ -6,6 +6,7 @@ import { Row } from "./row";
 import { useAtom } from "jotai";
 import { columnAtom, rowAtom } from "./atoms";
 import { Header } from "./header";
+import { TableFooter } from "./TableFooter";
 
 export type Column = string;
 
@@ -46,6 +47,7 @@ export function Table() {
                 colsRef={colsRef}
               />
             ))}
+            <TableFooter />
           </tbody>
         </table>
       </div>
