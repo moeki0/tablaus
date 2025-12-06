@@ -98,6 +98,16 @@ const runExpression = (expression: string, context: EvalContext): unknown => {
     columnIndex: nextContext.columnIndex,
     Math: Math,
     _: _ as typeof import("lodash"),
+    sum: () => {
+      const i = nextContext.columnIndex;
+      if (i !== undefined) {
+        return _.sum(
+          nextContext.rows.map((r) => Number(Object.values(r.values)[i]))
+        );
+      } else {
+        return 0;
+      }
+    },
     my: prop,
     button,
     today: () => format(new Date(), "yyyy/MM/dd"),
