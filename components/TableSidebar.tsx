@@ -58,7 +58,7 @@ export function TableSidebar({
         <SignInOutButton />
         <Link
           href="/tables/new"
-          className="inline-flex items-center justify-center cursor-default rounded-xl hover:bg-gray-100 border border-gray-300 shadow p-2 transition"
+          className="inline-flex items-center justify-center cursor-default rounded-xl hover:bg-gray-100 bg-white border border-gray-300 shadow p-2 transition"
         >
           <FiEdit size={18} className="stroke-gray-600" />
         </Link>
