@@ -392,7 +392,7 @@ export function Cell({
         }
         {buttonAction && !isEditing && (
           <button
-            className="m-2 px-4 text-sm hover:bg-gray-50 transition py-[3px] rounded-lg cursor-pointer  bg-white border border-gray-200 text-white"
+            className="m-2 px-4 text-sm hover:bg-gray-50 transition py-[3px] rounded-lg cursor-pointer  bg-white border border-gray-200 shadow"
             onClick={(e) => {
               e.stopPropagation();
               setCsv((csv) => {
