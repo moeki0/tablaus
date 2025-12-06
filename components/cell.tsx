@@ -227,6 +227,45 @@ export function Cell({
               setIsEditing(false);
               currentRowRef.current = null;
             }}
+            onPasteCapture={(e) => {
+              const v = e.clipboardData.getData("text/plain");
+              if (v.includes("\n")) {
+                e.preventDefault();
+                setCsv((csv) => {
+                  const table = parseCsv(csv);
+                  let rows = table;
+                  rows = rows.map((r, a) => {
+                    if (
+                      a >= i + 1 &&
+                      a <= i + 1 + v.split("\n").length &&
+                      a < rows.length - 1
+                    ) {
+                      r[j] = v.split("\n")[a - i - 1];
+                    }
+                    return r;
+                  });
+                  const rest = rows.length - 1 - i - 1;
+                  Array.from(
+                    {
+                      length: i + 1 + v.split("\n").length - rows.length + 1,
+                    },
+                    (_, index) => index
+                  ).forEach((index) => {
+                    rows = [
+                      ...rows.slice(0, rows.length - 1),
+                      createEmptyRow(table).map((c, k) => {
+                        if (k === j) {
+                          return v.split("\n")[index + rest];
+                        }
+                        return c;
+                      }),
+                      rows[rows.length - 1],
+                    ];
+                  });
+                  return stringifyCsv(rows);
+                });
+              }
+            }}
             onKeyDown={(e) => {
               if (
                 (e as any).isComposing ||
