@@ -210,7 +210,7 @@ export function Cell({
               }
               inputsRef.current[i][j] = el;
             }}
-            className={`p-2 outline-0 min-w-full ${
+            className={`p-2 text-[16px] outline-0 min-w-full ${
               !(!buttonAction || isEditing) && "hidden"
             }`}
             value={displayValue}
