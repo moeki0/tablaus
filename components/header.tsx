@@ -39,7 +39,8 @@ export function Header({
   useEffect(() => {
     if (
       currentColRef.current === i &&
-      prevColumns.current.join("") !== columns.join("")
+      (prevColumns.current.length !== columns.length ||
+        prevColumns.current.join("") !== columns.join(""))
     ) {
       colsRef.current[i]?.focus();
       prevColumns.current = columns;

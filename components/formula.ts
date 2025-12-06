@@ -1,8 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import _ from "lodash";
-import { dateFormats } from "./date-formats";
-import { differenceInYears, format, isValid, parse } from "date-fns";
+import { dateFormats, dateTimeFormats, timeFormats } from "./date-formats";
+import {
+  differenceInHours,
+  differenceInYears,
+  format,
+  isValid,
+  parse,
+} from "date-fns";
 import "ses";
+import { datetime } from "drizzle-orm/mysql-core";
 
 type RowLike = { values: Record<string, string> };
 
@@ -127,6 +134,9 @@ const runExpression = (expression: string, context: EvalContext): unknown => {
     age: (d: Date) => {
       return differenceInYears(new Date(), d);
     },
+    hours: (a: Date, b: Date) => {
+      return differenceInHours(a, b);
+    },
   });
 
   try {
@@ -155,7 +165,11 @@ const resolveProperty = (name: string, context: EvalContext): unknown => {
   if (!raw) {
     return raw;
   }
-  for (const { pattern, matcher } of dateFormats) {
+  for (const { pattern, matcher } of [
+    ...dateFormats,
+    ...timeFormats,
+    ...dateTimeFormats,
+  ]) {
     if (matcher && !matcher.test(raw)) {
       continue;
     }

@@ -21,16 +21,17 @@ import {
 import type { RowValues } from "./row";
 import { useAtom } from "jotai";
 import { tableAtom } from "./dataAtom";
-import { dateFormats } from "./date-formats";
+import { dateFormats, dateTimeFormats, timeFormats } from "./date-formats";
 
 const parseDateValue = (
   value: string
 ): { date: Date; output: string } | null => {
   const trimmed = value.trim();
-  if (String(Number(trimmed)) !== "NaN") {
-    return null;
-  }
-  for (const { pattern, output, matcher } of dateFormats) {
+  for (const { pattern, output, matcher } of [
+    ...dateTimeFormats,
+    ...dateFormats,
+    ...timeFormats,
+  ]) {
     if (matcher && !matcher.test(trimmed)) {
       continue;
     }
