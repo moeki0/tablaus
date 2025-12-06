@@ -2,32 +2,53 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as autosizeInput from "autosize-input";
+import { evaluateFormulaContent, stringifyFormulaValue } from "./formula";
+import { parseCsv, stringifyCsv, ensureRowLength } from "./csvTable";
+import { tableAtom } from "./dataAtom";
 import { useAtom } from "jotai";
-import { footerAtom, rowAtom } from "./atoms";
-import _ from "lodash";
 
-export function FooterCell({ i }: { i: number }) {
+export function FooterCell({
+  i,
+  value,
+  columns,
+  bodyRows,
+}: {
+  i: number;
+  value: string;
+  columns: string[];
+  bodyRows: string[][];
+}) {
+  const [csv, setCsv] = useAtom(tableAtom);
   const [editing, setEditing] = useState(false);
   const ref = useRef<HTMLTableCellElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [rows, setRows] = useAtom(rowAtom);
-  const [footers, setFooters] = useAtom(footerAtom);
+
+  const rowObjects = useMemo(
+    () =>
+      bodyRows.map((r) =>
+        columns.reduce<Record<string, string>>((acc, col, idx) => {
+          acc[col] = r[idx] ?? "";
+          return acc;
+        }, {})
+      ),
+    [bodyRows, columns]
+  );
+
+  const evaluation = useMemo(() => {
+    if (!value) return null;
+    return evaluateFormulaContent(value, {
+      rows: rowObjects.map((r) => ({ values: r })),
+      columns,
+      columnIndex: i,
+    });
+  }, [columns, i, rowObjects, value]);
+
   const result = useMemo(() => {
-    if (!footers[i]) {
-      return;
-    }
-    const count =
-      footers[i].match(/count\("(.+)"\)/) ||
-      footers[i].match(/count\('(.+)'\)/);
-    if (count) {
-      return rows.map((r) => r.values[i]).filter((v) => v === count[1]).length;
-    }
-    const sum = footers[i].match(/sum\(\)/);
-    if (sum) {
-      return _.sum(rows.map((r) => Number(r.values[i])));
-    }
-    return "";
-  }, [footers, i, rows]);
+    if (!value) return "";
+    if (!evaluation || !evaluation.isFormula) return value;
+    if (evaluation.error) return `#ERR ${evaluation.error}`;
+    return stringifyFormulaValue(evaluation.value);
+  }, [evaluation, value]);
 
   useEffect(() => {
     if (!inputRef.current) {
@@ -38,33 +59,24 @@ export function FooterCell({ i }: { i: number }) {
 
   return (
     <td>
-      {editing ? (
-        <input
-          ref={inputRef}
-          onBlur={() => setEditing(false)}
-          autoFocus
-          className="p-2 bg-white font-mono outline-0 min-w-full"
-          value={footers[i]}
-          onChange={(e) => {
-            setFooters((fs) => {
-              return fs.map((f, j) => {
-                if (j === i) {
-                  return e.target.value;
-                }
-                return f;
-              });
-            });
-          }}
-        />
-      ) : (
-        <div
-          ref={ref}
-          onClick={() => setEditing(true)}
-          className="p-2 min-w-full min-h-10 bg-gray-50"
-        >
-          {result}
-        </div>
-      )}
+      <input
+        ref={inputRef}
+        onBlur={() => setEditing(false)}
+        className="p-2 bg-gray-100 font-mono outline-0 min-w-full min-h-9"
+        value={editing ? value : result}
+        onChange={(e) => {
+          setCsv((csv) => {
+            const table = parseCsv(csv);
+            const footerIndex = table.length - 1;
+            table[footerIndex] = ensureRowLength(
+              table[footerIndex],
+              columns.length
+            );
+            table[footerIndex][i] = e.target.value;
+            return stringifyCsv(table);
+          });
+        }}
+      />
     </td>
   );
 }

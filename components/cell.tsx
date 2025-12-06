@@ -2,33 +2,34 @@
 /* eslint-disable react-hooks/refs */
 "use client";
 
-import { useAtom } from "jotai";
-import { columnAtom, rowAtom } from "./atoms";
 import { useFloating } from "@floating-ui/react";
 import { createPortal } from "react-dom";
 import { RefObject, useEffect, useMemo, useState } from "react";
 import _ from "lodash";
 import { addDays, format, isValid, parse } from "date-fns";
 import * as autosizeInput from "autosize-input";
+import { evaluateFormulaContent, stringifyFormulaValue } from "./formula";
+import {
+  createEmptyRow,
+  ensureRowLength,
+  parseCsv,
+  stringifyCsv,
+  extractColumns,
+  extractBody,
+  extractFooter,
+} from "./csvTable";
+import type { RowValues } from "./row";
+import { useAtom } from "jotai";
+import { tableAtom } from "./dataAtom";
+import { dateFormats } from "./date-formats";
 
-const dateFormats = [
-  { pattern: "yyyy/MM/dd", output: "yyyy/MM/dd", matcher: /^\d{4}\/\d{2}\/\d{2}$/ },
-  { pattern: "yyyy/M/d", output: "yyyy/M/d", matcher: /^\d{4}\/\d{1,2}\/\d{1,2}$/ },
-  { pattern: "yyyy-MM-dd", output: "yyyy-MM-dd", matcher: /^\d{4}-\d{2}-\d{2}$/ },
-  { pattern: "yyyy-M-d", output: "yyyy-M-d", matcher: /^\d{4}-\d{1,2}-\d{1,2}$/ },
-  { pattern: "yyyy.MM.dd", output: "yyyy.MM.dd", matcher: /^\d{4}\.\d{2}\.\d{2}$/ },
-  { pattern: "yyyy.M.d", output: "yyyy.M.d", matcher: /^\d{4}\.\d{1,2}\.\d{1,2}$/ },
-  { pattern: "yyyyMMdd", output: "yyyyMMdd", matcher: /^\d{8}$/ },
-  { pattern: "M/d/yy", output: "M/d/yy", matcher: /^\d{1,2}\/\d{1,2}\/\d{2}$/ },
-  { pattern: "M/d", output: "M/d", matcher: /^\d{1,2}\/\d{1,2}$/ },
-  { pattern: "M-d", output: "M-d", matcher: /^\d{1,2}-\d{1,2}$/ },
-  { pattern: "M.d", output: "M.d", matcher: /^\d{1,2}\.\d{1,2}$/ },
-  { pattern: "yyyy年M月d日", output: "yyyy年M月d日", matcher: /^\d{4}年\d{1,2}月\d{1,2}日$/ },
-  { pattern: "M月d日", output: "M月d日", matcher: /^\d{1,2}月\d{1,2}日$/ },
-] as const;
-
-const parseDateValue = (value: string): { date: Date; output: string } | null => {
+const parseDateValue = (
+  value: string
+): { date: Date; output: string } | null => {
   const trimmed = value.trim();
+  if (String(Number(trimmed)) !== "NaN") {
+    return null;
+  }
   for (const { pattern, output, matcher } of dateFormats) {
     if (matcher && !matcher.test(trimmed)) {
       continue;
@@ -43,10 +44,10 @@ const parseDateValue = (value: string): { date: Date; output: string } | null =>
     const fallbackFormat = trimmed.includes("-")
       ? "yyyy-MM-dd"
       : trimmed.includes(".")
-        ? "yyyy.MM.dd"
-        : trimmed.includes("年")
-          ? "yyyy年M月d日"
-          : "yyyy/MM/dd";
+      ? "yyyy.MM.dd"
+      : trimmed.includes("年")
+      ? "yyyy年M月d日"
+      : "yyyy/MM/dd";
     return { date: autoParsed, output: fallbackFormat };
   }
   return null;
@@ -59,6 +60,9 @@ export function Cell({
   inputsRef,
   currentRowRef,
   colsRef,
+  columns,
+  rows,
+  rowValues,
 }: {
   value: string;
   i: number;
@@ -66,16 +70,20 @@ export function Cell({
   inputsRef: RefObject<(HTMLInputElement | null)[][]>;
   currentRowRef: RefObject<number | null>;
   colsRef: RefObject<(HTMLInputElement | null)[]>;
+  columns: string[];
+  rows: string[][];
+  rowValues: RowValues;
 }) {
-  const [rows, setRows] = useAtom(rowAtom);
-  const [columns, setColumns] = useAtom(columnAtom);
+  const [csv, setCsv] = useAtom(tableAtom);
   const { refs, floatingStyles } = useFloating({
     placement: "top-start",
   });
+  const [isEditing, setIsEditing] = useState(false);
   const [completion, setCompletion] = useState(false);
-  const values = _.uniq(rows.map((r) => r.values[j]).filter((r, k) => k !== i));
+  const columnName = columns[j];
+  const values = _.uniq(rows.map((r) => r[j]).filter((r, k) => k !== i));
   const nextDate: string | null = useMemo(() => {
-    const v = rows.map((r) => r.values[j])[i - 1];
+    const v = rows[i - 1]?.[j];
     if (!v) {
       return null;
     }
@@ -94,170 +102,282 @@ export function Cell({
   }, [values, nextDate]);
   const [com, setCom] = useState<number | null>(null);
 
-  const setCurrent = (value: string) => {
-    setRows((rows) => {
-      return rows.map((row, k) => {
-        if (k === i) {
-          row.values = row.values.map((c, l) => {
-            if (l === j) {
-              return value;
-            }
-            return c;
-          });
-        }
-        return row;
-      });
+  const rowsForEval = useMemo(
+    () =>
+      rows.map((r) =>
+        columns.reduce<RowValues>((acc, col, idx) => {
+          acc[col] = r[idx] ?? "";
+          return acc;
+        }, {})
+      ),
+    [columns, rows]
+  );
+
+  const evaluation = useMemo(
+    () =>
+      evaluateFormulaContent(value ?? "", {
+        rows: rowsForEval.map((r) => ({ values: r })),
+        columns,
+        rowValues,
+        rowIndex: i,
+        columnIndex: j,
+      }),
+    [columns, i, j, rowValues, rowsForEval, value]
+  );
+  const buttonAction =
+    evaluation.isFormula &&
+    evaluation.value &&
+    typeof evaluation.value === "object" &&
+    (evaluation.value as any).__button
+      ? (evaluation.value as {
+          label: string;
+          onClick: (rows: Record<string, string>[], rowIndex: number) => void;
+        })
+      : null;
+  const displayValue = useMemo(() => {
+    if (buttonAction && isEditing) return value || "";
+    if (buttonAction && !isEditing) return "";
+    if (isEditing) return value || "";
+    if (!evaluation.isFormula) return value || "";
+    if (evaluation.error) return `#ERR ${evaluation.error}`;
+    return stringifyFormulaValue(evaluation.value);
+  }, [buttonAction, evaluation, isEditing, value]);
+
+  const setCurrent = (newValue: string) => {
+    setCsv((csv) => {
+      const table = parseCsv(csv);
+      const targetIndex = i + 1; // header is 0
+      table[targetIndex] = ensureRowLength(table[targetIndex], columns.length);
+      table[targetIndex][j] = newValue;
+      if (newValue.match(/^% /)) {
+        table.forEach((row, k) => {
+          if (k === 0 || k === table.length - 1) {
+            return;
+          }
+          row[j] = newValue;
+        });
+      }
+      return stringifyCsv(table);
     });
-    if (inputsRef.current[i][j]) {
-      inputsRef.current[i][j].value = value || "";
+    if (inputsRef.current[i]?.[j]) {
+      inputsRef.current[i][j]!.value = newValue || "";
       const e = new Event("input", { bubbles: true });
-      inputsRef.current[i][j].dispatchEvent(e);
+      inputsRef.current[i][j]!.dispatchEvent(e);
     }
   };
 
   useEffect(() => {
     if (j === 0 && currentRowRef.current === i) {
-      inputsRef.current[i][j]?.focus();
+      inputsRef.current[i]?.[j]?.focus();
     }
-    autosizeInput(inputsRef.current[i][j]);
   }, [currentRowRef, i, inputsRef, j]);
 
   useEffect(() => {
-    if (inputsRef.current[i][j] && value?.match(/\[[x ]\]/)) {
-      inputsRef.current[i][j].style.fontFamily = "monospace";
-      autosizeInput(inputsRef.current[i][j]);
-    } else if (inputsRef.current[i][j]) {
-      inputsRef.current[i][j].style.fontFamily = "Helvetica Neue";
-      autosizeInput(inputsRef.current[i][j]);
+    if (inputsRef.current[i]?.[j]) {
+      inputsRef.current[i][j].value ||= " ";
+      autosizeInput(inputsRef.current[i]?.[j]);
+    }
+  }, [i, inputsRef, j, displayValue]);
+
+  useEffect(() => {
+    if (inputsRef.current[i]?.[j]) {
+      inputsRef.current[i]![j]!.style.fontFamily =
+        value?.match(/\[[x ]\]/) || value?.match(/^% /)
+          ? "monospace"
+          : "Helvetica Neue";
+      autosizeInput(inputsRef.current[i]![j]);
     }
   }, [i, inputsRef, j, value]);
 
   return (
     <>
-      <td ref={refs.setReference}>
-        <input
-          ref={(el) => {
-            if (!inputsRef.current[i]) {
-              inputsRef.current[i] = [];
-            }
-            inputsRef.current[i][j] = el;
-          }}
-          className="p-2 outline-0 min-w-full"
-          value={value || ""}
-          onFocus={() => {
-            currentRowRef.current = i;
-            if (inputsRef.current[i][j]?.value) {
-              return;
-            }
-            if (allValues.length === 0) {
-              return;
-            }
-            setCompletion(true);
-            setCom(0);
-          }}
-          onBlur={() => {
-            setCom(null);
-            setCompletion(false);
-          }}
-          onKeyDown={(e) => {
-            if (
-              (e as any).isComposing ||
-              e.key === "Process" ||
-              e.keyCode === 229
-            ) {
-              return;
-            }
-            if (
-              (e.key === "Delete" || e.key === "Backspace") &&
-              j === 0 &&
-              !rows[i].values.some((v) => v)
-            ) {
-              e.preventDefault();
-              setRows((rows) => {
-                return rows.filter((r, index) => index !== i);
-              });
-              if (inputsRef.current[i - 1]) {
-                inputsRef.current[i - 1][
-                  inputsRef.current[i - 1].length - 1
-                ]?.focus();
-              } else {
-                colsRef.current[colsRef.current.length - 1]?.focus();
+      <td
+        ref={refs.setReference}
+        onClick={() => {
+          setIsEditing(true);
+        }}
+      >
+        {
+          <input
+            ref={(el) => {
+              if (!inputsRef.current[i]) {
+                inputsRef.current[i] = [];
               }
-              return;
-            }
-            if (e.key === "Tab" && e.shiftKey) {
-              return;
-            }
-            if (e.key === "Tab") {
-              e.preventDefault();
-            }
-            if (e.key === "Escape") {
-              setCompletion(false);
-              setCom(null);
-              return;
-            }
-            if (e.key === "Enter" && com !== null) {
-              setCurrent(allValues[com]);
-              setCompletion(false);
-              setCom(null);
-              return;
-            }
-            if (e.key === "Enter" && com === null) {
-              setRows((rows) => {
-                if (currentRowRef.current === null) return rows;
-                return [
-                  ...rows.slice(0, currentRowRef.current + 1),
-                  {
-                    id: crypto.randomUUID().replace(/-/g, ""),
-                    values: columns.map(() => ""),
-                  },
-                  ...rows.slice(currentRowRef.current + 1),
-                ];
-              });
-              if (currentRowRef.current !== null) {
-                currentRowRef.current += 1;
-              }
-            }
-            if (com === null && e.key === "Tab" && !e.shiftKey) {
-              setCompletion(false);
-              setCom(null);
-              if (j < rows[i].values.length - 1) {
-                inputsRef.current[i][j + 1]?.focus();
-              } else if (i === rows.length - 1) {
-                setRows((rows) => [
-                  ...rows,
-                  {
-                    id: crypto.randomUUID().replace(/-/g, ""),
-                    values: columns.map(() => ""),
-                  },
-                ]);
-                if (currentRowRef.current) {
-                  currentRowRef.current += 1;
-                }
-              } else {
-                inputsRef.current[i + 1][0]?.focus();
-              }
-              return;
-            }
-            if (e.key === "Tab") {
-              if (com === null) {
-                setCom(0);
+              inputsRef.current[i][j] = el;
+            }}
+            className={`p-2 outline-0 min-w-full ${
+              !(!buttonAction || isEditing) && "hidden"
+            }`}
+            value={displayValue}
+            onFocus={() => {
+              setIsEditing(true);
+              currentRowRef.current = i;
+              if (inputsRef.current[i]?.[j]?.value) {
                 return;
               }
-              setCom((com + 1) % allValues.length);
-            }
-          }}
-          onChange={(e) => {
-            if (e.target.value === "") {
+              if (allValues.length === 0) {
+                return;
+              }
               setCompletion(true);
               setCom(0);
-            } else {
-              setCompletion(false);
+            }}
+            onBlur={() => {
               setCom(null);
-            }
-            setCurrent(e.target.value);
-          }}
-        />
+              setCompletion(false);
+              setIsEditing(false);
+              currentRowRef.current = null;
+            }}
+            onKeyDown={(e) => {
+              if (
+                (e as any).isComposing ||
+                e.key === "Process" ||
+                e.keyCode === 229
+              ) {
+                return;
+              }
+              if (
+                (e.key === "Delete" || e.key === "Backspace") &&
+                j === 0 &&
+                columns.every((col) => !rowValues[col])
+              ) {
+                e.preventDefault();
+                if (csv.length === 3) {
+                  return;
+                }
+                setCsv((csv) => {
+                  const table = parseCsv(csv);
+                  const targetIndex = i + 1;
+                  table.splice(targetIndex, 1);
+                  return stringifyCsv(table);
+                });
+                if (inputsRef.current[i - 1]) {
+                  inputsRef.current[i - 1][columns.length - 1]?.focus();
+                }
+                return;
+              }
+              if (e.key === "Tab" && e.shiftKey) {
+                return;
+              }
+              if (e.key === "Tab") {
+                e.preventDefault();
+              }
+              if (
+                e.key === "Escape" ||
+                e.key === "Backspace" ||
+                e.key === "Delete"
+              ) {
+                setCompletion(false);
+                setCom(null);
+                return;
+              }
+              if (e.key === "Enter" && com !== null) {
+                setCurrent(allValues[com]);
+                setCompletion(false);
+                setCom(null);
+                return;
+              }
+              if (e.key === "Enter" && com === null) {
+                if (j === 0) {
+                  setCsv((csv) => {
+                    const table = parseCsv(csv);
+                    const newRow = createEmptyRow(table);
+                    table.splice(i + 1, 0, newRow); // after current body row (header + body)
+                    return stringifyCsv(table);
+                  });
+                  inputsRef.current[i]?.[0]?.focus();
+                } else {
+                  setCsv((csv) => {
+                    const table = parseCsv(csv);
+                    const newRow = createEmptyRow(table);
+                    table.splice(i + 2, 0, newRow); // after current body row (header + body)
+                    return stringifyCsv(table);
+                  });
+                  if (i < columns.length - 1) {
+                    inputsRef.current[i + 1]?.[0]?.focus();
+                  }
+                  if (currentRowRef.current !== null) {
+                    currentRowRef.current += 1;
+                  }
+                }
+              }
+              if (com === null && e.key === "Tab" && !e.shiftKey) {
+                setCompletion(false);
+                setCom(null);
+                console.log(i, j, rows.length, columns.length);
+                if (i <= rows.length - 1 && j < columns.length - 1) {
+                  inputsRef.current[i]?.[j + 1]?.focus();
+                } else if (i < rows.length - 1) {
+                  inputsRef.current[i + 1]?.[0]?.focus();
+                } else {
+                  setCsv((csv) => {
+                    const table = parseCsv(csv);
+                    const newRow = createEmptyRow(table);
+                    table.splice(table.length - 1, 0, newRow);
+                    return stringifyCsv(table);
+                  });
+                  if (currentRowRef.current !== null) {
+                    currentRowRef.current += 1;
+                  }
+                }
+                return;
+              }
+              if (e.key === "Tab") {
+                if (com === null) {
+                  setCom(0);
+                  return;
+                }
+                setCom((com + 1) % allValues.length);
+              }
+            }}
+            onChange={(e) => {
+              if (e.target.value === "") {
+                setCompletion(true);
+                setCom(0);
+              } else {
+                setCompletion(false);
+                setCom(null);
+              }
+              setCurrent(e.target.value);
+            }}
+          />
+        }
+        {buttonAction && !isEditing && (
+          <button
+            className="m-2 px-4 text-sm hover:bg-gray-50 transition py-[3px] rounded-lg cursor-pointer  bg-white border border-gray-200 text-white"
+            onClick={(e) => {
+              e.stopPropagation();
+              setCsv((csv) => {
+                const table = parseCsv(csv);
+                const cols = extractColumns(table);
+                const body = extractBody(table);
+                const footer = extractFooter(table);
+                const rowObjects = body.map((r) =>
+                  cols.reduce<RowValues>((acc, col, idx) => {
+                    acc[col] = r[idx] ?? "";
+                    return acc;
+                  }, {})
+                );
+                try {
+                  buttonAction.onClick(rowObjects, i);
+                } catch (error) {
+                  console.error(error);
+                  return csv;
+                }
+                const updatedBody = rowObjects.map((r) =>
+                  cols.map((col) => r[col] ?? "")
+                );
+                const newTable = [
+                  ensureRowLength(cols, cols.length),
+                  ...updatedBody,
+                  ensureRowLength(footer, cols.length),
+                ];
+                return stringifyCsv(newTable);
+              });
+            }}
+          >
+            {buttonAction.label}
+          </button>
+        )}
       </td>
       {completion && (
         <>

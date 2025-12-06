@@ -2,32 +2,44 @@
 
 import { RefObject } from "react";
 import { Cell } from "./cell";
-import type { Row } from "./table";
+import { useAtom } from "jotai";
+import { tableAtom } from "./dataAtom";
+
+export type RowValues = Record<string, string>;
 
 export function Row({
   row,
+  rowValues,
   i,
   inputsRef,
   currentRowRef,
   colsRef,
+  columns,
+  allRows,
 }: {
-  row: Row;
+  row: string[];
+  rowValues: RowValues;
   i: number;
   inputsRef: RefObject<HTMLInputElement[][]>;
   currentRowRef: RefObject<number | null>;
   colsRef: RefObject<(HTMLInputElement | null)[]>;
+  columns: string[];
+  allRows: string[][];
 }) {
   return (
     <tr className=" divide-gray-200 divide-x border-y border-gray-200">
-      {row.map((c, j) => (
+      {columns.map((c, j) => (
         <Cell
           inputsRef={inputsRef}
           key={`cell-${j}`}
-          value={c}
+          value={row[j] ?? ""}
           j={j}
           i={i}
           currentRowRef={currentRowRef}
           colsRef={colsRef}
+          columns={columns}
+          rows={allRows}
+          rowValues={rowValues}
         />
       ))}
     </tr>
