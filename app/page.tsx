@@ -64,7 +64,16 @@ export default async function TablesPage() {
                 <div>
                   <div className="font-semibold mb-1">{t.name}</div>
                   <pre className="text-xs w-full text-wrap break-all  text-gray-500">
-                    {t.csv.replaceAll(/,/g, " ")}
+                    {t.csv
+                      .split("\n")
+                      .map((row) =>
+                        row
+                          .split(",")
+                          .filter((col) => !/^"?% /.test(col))
+                          .filter((col) => col.length > 0)
+                          .join(" ")
+                      )
+                      .join("\n")}
                   </pre>
                 </div>
               </Link>
