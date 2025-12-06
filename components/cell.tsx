@@ -186,10 +186,10 @@ export function Cell({
 
   useEffect(() => {
     if (inputsRef.current[i]?.[j]) {
-      inputsRef.current[i]![j]!.style.fontFamily =
+      inputsRef.current[i]![j]!.classList.add(
         value?.match(/\[[x ]\]/) || value?.match(/^% /)
-          ? "monospace"
-          : "Helvetica Neue";
+          ? "font-mono"
+          : "font-sans");
       autosizeInput(inputsRef.current[i]![j]);
     }
   }, [i, inputsRef, j, value]);
