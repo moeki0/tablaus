@@ -16,6 +16,7 @@ import {
 } from "@floating-ui/react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useState } from "react";
+import { FiMenu } from "react-icons/fi";
 import { IoMenu } from "react-icons/io5";
 
 export function SignInOutButton() {
@@ -53,7 +54,7 @@ export function SignInOutButton() {
         className="p-2 rounded hover:bg-gray-100 transition"
         aria-label="メニューを開く"
       >
-        <IoMenu size={22} />
+        <FiMenu size={18} />
       </button>
 
       {open && (

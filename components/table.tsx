@@ -25,6 +25,7 @@ import type { RowValues } from "./row";
 import { initialCsv as defaultCsv } from "./csvTable";
 import { TableTitle } from "./TableTitle";
 import { emitTableUpdated } from "@/lib/tableUpdateEvent";
+import { BsLayoutSidebar } from "react-icons/bs";
 import { FiSidebar } from "react-icons/fi";
 
 export function Table({
@@ -148,7 +149,7 @@ export function Table({
             onClick={onOpenSidebar}
             className="md:hidden inline-flex items-center gap-2 rounded p-2 hover:bg-gray-100 transition"
           >
-            <FiSidebar size={22} />
+            <FiSidebar size={18} />
           </button>
         ) : null}
         <TableTitle id={tableId!} initialName={initialName} />

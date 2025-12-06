@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { TABLE_UPDATED_EVENT } from "@/lib/tableUpdateEvent";
 import { GoPlus } from "react-icons/go";
 import { SignInOutButton } from "./auth/SignInOutButton";
+import { FiEdit } from "react-icons/fi";
 
 type TableSummary = { id: string; name: string };
 
@@ -53,13 +54,13 @@ export function TableSidebar({
 
   return (
     <>
-      <div className="p-2 md:p-4 flex items-center">
+      <div className="p-2 md:p-4 flex justify-between items-center">
         <SignInOutButton />
         <Link
           href="/tables/new"
-          className="inline-flex items-center justify-center cursor-default rounded hover:bg-gray-100 p-2 transition"
+          className="inline-flex items-center justify-center cursor-default rounded-xl hover:bg-gray-100 border border-gray-300 shadow p-2 transition"
         >
-          <GoPlus size={22} />
+          <FiEdit size={18} className="stroke-gray-600" />
         </Link>
       </div>
       <div className="flex-1 overflow-y-auto">
