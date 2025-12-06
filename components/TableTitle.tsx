@@ -40,7 +40,7 @@ export function TableTitle({
     <div className="flex items-center gap-2 mb-4">
       <input
         ref={ref}
-        className="text-2xl bg-transparent border-gray-300 focus:outline-none focus:border-gray-500"
+        className="text-2xl bg-transparent min-w-full border-gray-300 focus:outline-none focus:border-gray-500"
         value={name}
         onChange={(e) => setName(e.target.value)}
         onBlur={(e) => save(e.target.value)}
