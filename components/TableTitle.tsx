@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import * as autosizeInput from "autosize-input";
+import { emitTableUpdated } from "@/lib/tableUpdateEvent";
 
 export function TableTitle({
   id,
@@ -26,21 +27,24 @@ export function TableTitle({
     if (!id) return;
     setSaving(true);
     try {
-      await fetch(`/api/tables/${id}`, {
+      const res = await fetch(`/api/tables/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: next }),
       });
+      if (res.ok) {
+        emitTableUpdated(id);
+      }
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <div className="flex items-center gap-2 mb-4">
+    <div className="flex items-center gap-2">
       <input
         ref={ref}
-        className="text-2xl bg-transparent min-w-full border-gray-300 focus:outline-none focus:border-gray-500"
+        className="font-bold bg-transparent min-w-full border-gray-300 focus:outline-none focus:border-gray-500"
         value={name}
         onChange={(e) => setName(e.target.value)}
         onBlur={(e) => save(e.target.value)}

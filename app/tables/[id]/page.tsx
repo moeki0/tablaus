@@ -1,16 +1,12 @@
-import { notFound, redirect } from "next/navigation";
+import { initialCsv } from "@/components/csvTable";
+import { tables } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { tables } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import { Table } from "@/components/table";
-import Link from "next/link";
-import { SignInOutButton } from "@/components/auth/SignInOutButton";
-import { initialCsv } from "@/components/csvTable";
 import { ensureSchema } from "@/lib/ensureSchema";
-import { TableTitle } from "@/components/TableTitle";
 import { pool } from "@/lib/db";
-import Image from "next/image";
+import { notFound, redirect } from "next/navigation";
+import { desc, eq } from "drizzle-orm";
+import { TableWorkspace } from "@/components/TableWorkspace";
 
 export default async function TableDetailPage({
   params,
@@ -20,11 +16,13 @@ export default async function TableDetailPage({
   const { id } = await params;
   await ensureSchema(pool);
   const session = await auth();
+
   if (!session?.user?.email) {
-    redirect("/tables");
+    redirect("/");
   }
+
   if (id === "new") {
-    const [{ id }] = await db
+    const [{ id: newId }] = await db
       .insert(tables)
       .values({
         name: "Untitled",
@@ -32,7 +30,7 @@ export default async function TableDetailPage({
         userId: session.user.email,
       })
       .returning({ id: tables.id });
-    redirect(`/tables/${id}`);
+    redirect(`/tables/${newId}`);
   }
 
   const [row] = await db.select().from(tables).where(eq(tables.id, id));
@@ -40,21 +38,25 @@ export default async function TableDetailPage({
     notFound();
   }
 
+  const tableList = await db
+    .select({
+      id: tables.id,
+      name: tables.name,
+      createdAt: tables.createdAt,
+    })
+    .from(tables)
+    .where(eq(tables.userId, session.user.email))
+    .orderBy(desc(tables.updatedAt), desc(tables.createdAt));
+
   return (
-    <main className="p-4 space-y-4">
-      <header className="flex items-center justify-between">
-        <div className="space-y-1">
-          <div className=" text-gray-500">
-            <Link href="/" className="">
-              <Image width={28} height={28} alt="tablaus" src="/tablaus.png" />
-            </Link>{" "}
-          </div>
-        </div>
-        <SignInOutButton />
-      </header>
-      <div className="">
-        <Table tableId={row.id} initialCsv={row.csv} initialName={row.name} />
-      </div>
+    <main>
+      <TableWorkspace
+        tableList={tableList.map((t) => ({ id: t.id, name: t.name }))}
+        activeId={row.id}
+        tableId={row.id}
+        initialCsv={row.csv}
+        initialName={row.name}
+      />
     </main>
   );
 }

@@ -24,6 +24,7 @@ import {
 import type { RowValues } from "./row";
 import { initialCsv as defaultCsv } from "./csvTable";
 import { TableTitle } from "./TableTitle";
+import { emitTableUpdated } from "@/lib/tableUpdateEvent";
 
 export function Table({
   tableId,
@@ -44,6 +45,7 @@ export function Table({
   const currentColRef = useRef<number>(null);
   const colsRef = useRef<(HTMLInputElement | null)[]>([]);
   const currentRowRef = useRef<number | null>(null);
+  const initRef = useRef(csv);
 
   useEffect(() => {
     const next = initialCsv ?? defaultCsv;
@@ -51,7 +53,14 @@ export function Table({
   }, [initialCsv, resetTable]);
 
   useEffect(() => {
+    initRef.current = csv;
+  }, [csv]);
+
+  useEffect(() => {
     if (!tableId) return;
+    if (initRef.current === csv) {
+      return;
+    }
     const controller = new AbortController();
     const id = setTimeout(() => {
       fetch(`/api/tables/${tableId}`, {
@@ -59,7 +68,13 @@ export function Table({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ csv }),
         signal: controller.signal,
-      }).catch((err) => console.error(err));
+      })
+        .then((res) => {
+          if (!controller.signal.aborted && res?.ok) {
+            emitTableUpdated(tableId);
+          }
+        })
+        .catch((err) => console.error(err));
     }, 500);
     return () => {
       controller.abort();
@@ -122,12 +137,14 @@ export function Table({
   }, [redo, undo]);
 
   return (
-    <div className="p-4 flex justify-center">
-      <div className="bg-white inline-block overflow-scroll p-8 shadow border border-gray-200 rounded">
+    <div className="">
+      <div className="px-4 py-2 border-b border-gray-200">
         <TableTitle id={tableId!} initialName={initialName} />
+      </div>
+      <div className="p-4 h-[calc(100vh-80px)] overflow-scroll max-w-full">
         <table>
           <thead>
-            <tr className="">
+            <tr className="border border-gray-200 divide-gray-200 divide-x">
               {columns.map((c, i) => (
                 <Header
                   colsRef={colsRef}

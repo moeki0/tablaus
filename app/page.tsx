@@ -1,17 +1,17 @@
-import Link from "next/link";
+import { SignInOutButton } from "@/components/auth/SignInOutButton";
+import { tables } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { tables } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
-import { SignInOutButton } from "@/components/auth/SignInOutButton";
 import { ensureSchema } from "@/lib/ensureSchema";
 import { pool } from "@/lib/db";
-import Image from "next/image";
-import { parseCsv } from "@/components/csvTable";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { desc, eq } from "drizzle-orm";
 
-export default async function TablesPage() {
+export default async function HomePage() {
   await ensureSchema(pool);
   const session = await auth();
+
   if (!session?.user?.email) {
     return (
       <main className="p-10 space-y-6">
@@ -19,67 +19,43 @@ export default async function TablesPage() {
           <h1 className="text-2xl font-bold">Tables</h1>
           <SignInOutButton />
         </header>
-        <p>テーブルを見るにはログインしてください。</p>
+        <p>テーブルにアクセスするにはログインしてください。</p>
       </main>
     );
   }
 
-  const data = await db
-    .select()
-    .from(tables)
-    .where(eq(tables.userId, session.user.email))
-    .orderBy(desc(tables.createdAt));
+  const userId = session.user.email;
+  const cookieStore = await cookies();
+  const recentId = cookieStore.get("recentTableId")?.value ?? null;
 
-  const createHref = "/tables/new";
+  let targetId: string | null = null;
 
-  return (
-    <main className="p-4 space-y-4 mx-auto">
-      <header className="flex items-center justify-between">
-        <div className=" text-gray-500 flex items-center gap-10">
-          <Link href="/" className="">
-            <Image width={28} height={28} alt="tablaus" src="/tablaus.png" />
-          </Link>{" "}
-        </div>
-        <SignInOutButton />
-      </header>
-      <div className="space-y-3 max-w-[1000px] mx-auto">
-        <Link
-          href={createHref}
-          className="inline-flex items-center px-3 py-2 rounded bg-green-600 hover:bg-green-700 text-white text-sm"
-        >
-          新規作成
-        </Link>
-        <div className="">
-          {data.length === 0 && (
-            <div className="p-4 text-sm text-gray-500">
-              まだテーブルがありません。
-            </div>
-          )}
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5">
-            {data.map((t) => (
-              <Link
-                key={t.id}
-                href={`/tables/${t.id}`}
-                className="flex aspect-square overflow-hidden shadow rounded px-4 py-3 hover:bg-gray-50 bg-white"
-              >
-                <div>
-                  <div className="font-semibold mb-1">{t.name}</div>
-                  <pre className="text-xs w-full text-wrap break-all  text-gray-500">
-                    {parseCsv(t.csv)
-                      .map((row) =>
-                        row
-                          .filter((col) => !/^"?% /.test(col))
-                          .filter((col) => col.length > 0)
-                          .join(" ")
-                      )
-                      .join("\n")}
-                  </pre>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </div>
-    </main>
-  );
+  if (recentId) {
+    const [recent] = await db
+      .select({ id: tables.id })
+      .from(tables)
+      .where(eq(tables.id, recentId))
+      .limit(1);
+    if (recent) {
+      targetId = recent.id;
+    }
+  }
+
+  if (!targetId) {
+    const [latest] = await db
+      .select({ id: tables.id })
+      .from(tables)
+      .where(eq(tables.userId, userId))
+      .orderBy(desc(tables.updatedAt), desc(tables.createdAt))
+      .limit(1);
+    if (latest) {
+      targetId = latest.id;
+    }
+  }
+
+  if (targetId) {
+    redirect(`/tables/${targetId}`);
+  }
+
+  redirect("/tables/new");
 }
