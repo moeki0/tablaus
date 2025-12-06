@@ -122,7 +122,18 @@ const runExpression = (expression: string, context: EvalContext): unknown => {
       const i = nextContext.columnIndex;
       if (i !== undefined) {
         return _.sum(
-          nextContext.rows.map((r) => Number(Object.values(r.values)[i]))
+          nextContext.rows
+            .map((_, index) => {
+              const c = {
+                rows: context.rows,
+                columns: context.columns,
+                rowValues: context.rowValues,
+                rowIndex: index,
+                columnIndex: i,
+              };
+              return Number(resolveProperty(context.columns[i], c));
+            })
+            .filter((v) => !isNaN(v))
         );
       } else {
         return 0;
