@@ -42,7 +42,7 @@ export default async function TablesPage() {
         </div>
         <SignInOutButton />
       </header>
-      <div className="space-y-3">
+      <div className="space-y-3 max-w-[1000px] mx-auto">
         <Link
           href={createHref}
           className="inline-flex items-center px-3 py-2 rounded bg-green-600 hover:bg-green-700 text-white text-sm"
@@ -55,7 +55,7 @@ export default async function TablesPage() {
               まだテーブルがありません。
             </div>
           )}
-          <div className="grid grid-cols-3 gap-4 sm:grid-cols-5">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5">
             {data.map((t) => (
               <Link
                 key={t.id}
