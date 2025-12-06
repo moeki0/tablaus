@@ -98,6 +98,19 @@ const runExpression = (expression: string, context: EvalContext): unknown => {
     columnIndex: nextContext.columnIndex,
     Math: Math,
     _: _ as typeof import("lodash"),
+    count: (pattern?: string) => {
+      const i = nextContext.columnIndex;
+      if (i !== undefined) {
+        if (!pattern) {
+          return nextContext.rows.length;
+        }
+        return nextContext.rows.filter(
+          (r) => Object.values(r.values)[i] === pattern
+        ).length;
+      } else {
+        return 0;
+      }
+    },
     sum: () => {
       const i = nextContext.columnIndex;
       if (i !== undefined) {
