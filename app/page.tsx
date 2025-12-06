@@ -7,6 +7,7 @@ import { SignInOutButton } from "@/components/auth/SignInOutButton";
 import { ensureSchema } from "@/lib/ensureSchema";
 import { pool } from "@/lib/db";
 import Image from "next/image";
+import { parseCsv } from "@/components/csvTable";
 
 export default async function TablesPage() {
   await ensureSchema(pool);
@@ -64,11 +65,9 @@ export default async function TablesPage() {
                 <div>
                   <div className="font-semibold mb-1">{t.name}</div>
                   <pre className="text-xs w-full text-wrap break-all  text-gray-500">
-                    {t.csv
-                      .split("\n")
+                    {parseCsv(t.csv)
                       .map((row) =>
                         row
-                          .split(",")
                           .filter((col) => !/^"?% /.test(col))
                           .filter((col) => col.length > 0)
                           .join(" ")
