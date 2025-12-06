@@ -64,11 +64,11 @@ export function SignInOutButton() {
               ref={refs.setFloating}
               style={{ ...floatingStyles, ...styles }}
               {...getFloatingProps()}
-              className="z-50 min-w-[160px] rounded border border-gray-100 bg-white shadow-lg py-1"
+              className="z-50 min-w-40 rounded border border-gray-200 bg-white shadow-lg py-1"
             >
               <button
                 onClick={handleAction}
-                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                className="w-full text-left px-4 py-1 text-sm"
               >
                 {isAuthed ? "Log out" : "Log in with Google"}
               </button>

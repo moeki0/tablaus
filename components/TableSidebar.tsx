@@ -54,22 +54,22 @@ export function TableSidebar({
 
   return (
     <>
-      <div className="p-2 md:p-4 flex justify-between items-center">
+      <div className="p-2 md:px-4 flex justify-between items-center">
         <SignInOutButton />
         <Link
           href="/tables/new"
-          className="inline-flex items-center justify-center cursor-default rounded-xl hover:bg-gray-100 bg-white border border-gray-300 shadow p-2 transition"
+          className="inline-flex items-center justify-center cursor-default rounded-xl hover:bg-gray-100 bg-white border border-gray-300 shadow p-1.5 transition"
         >
           <FiEdit size={18} className="stroke-gray-600" />
         </Link>
       </div>
       <div className="flex-1 overflow-y-auto">
         {list.length === 0 ? (
-          <div className="p-2 md:p-4 text-sm text-gray-500">
+          <div className="p-2 md:p-4 pt-0! text-sm text-gray-500">
             まだテーブルがありません。
           </div>
         ) : (
-          <nav className="p-2">
+          <nav className="p-2 pt-0!">
             {list.map((t) => {
               const isActive = t.id === activeId;
               return (
