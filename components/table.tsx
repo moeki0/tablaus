@@ -25,15 +25,18 @@ import type { RowValues } from "./row";
 import { initialCsv as defaultCsv } from "./csvTable";
 import { TableTitle } from "./TableTitle";
 import { emitTableUpdated } from "@/lib/tableUpdateEvent";
+import { FiSidebar } from "react-icons/fi";
 
 export function Table({
   tableId,
   initialCsv,
   initialName,
+  onOpenSidebar,
 }: {
   tableId?: string;
   initialCsv?: string;
   initialName: string;
+  onOpenSidebar?: () => void;
 }) {
   const csv = useAtomValue(tableAtom);
   const resetTable = useSetAtom(resetTableAtom);
@@ -138,7 +141,16 @@ export function Table({
 
   return (
     <div className="">
-      <div className="px-4 py-2 border-b border-gray-200">
+      <div className="flex items-center gap-1 p-2 md:p-4 border-b border-gray-200">
+        {onOpenSidebar ? (
+          <button
+            type="button"
+            onClick={onOpenSidebar}
+            className="md:hidden inline-flex items-center gap-2 rounded p-2 hover:bg-gray-100 transition"
+          >
+            <FiSidebar size={22} />
+          </button>
+        ) : null}
         <TableTitle id={tableId!} initialName={initialName} />
       </div>
       <div className="p-4 h-[calc(100vh-80px)] overflow-scroll max-w-full">

@@ -11,9 +11,11 @@ type TableSummary = { id: string; name: string };
 export function TableSidebar({
   tables,
   activeId,
+  onNavigate,
 }: {
   tables: TableSummary[];
   activeId: string;
+  onNavigate?: () => void;
 }) {
   const [list, setList] = useState<TableSummary[]>(tables);
   const fetchTimer = useRef<number | null>(null);
@@ -51,7 +53,7 @@ export function TableSidebar({
 
   return (
     <>
-      <div className="px-4 flex items-center">
+      <div className="p-2 md:p-4 flex items-center">
         <SignInOutButton />
         <Link
           href="/tables/new"
@@ -62,7 +64,7 @@ export function TableSidebar({
       </div>
       <div className="flex-1 overflow-y-auto">
         {list.length === 0 ? (
-          <div className="p-4 text-sm text-gray-500">
+          <div className="p-2 md:p-4 text-sm text-gray-500">
             まだテーブルがありません。
           </div>
         ) : (
@@ -73,7 +75,8 @@ export function TableSidebar({
                 <Link
                   key={t.id}
                   href={`/tables/${t.id}`}
-                  className={`block px-4 py-1 rounded text-sm truncate cursor-default transition ${
+                  onClick={onNavigate}
+                  className={`block px-2 md:px-4 py-[5px] rounded text-sm truncate cursor-default transition ${
                     isActive ? "bg-gray-200 text-gray-900" : "text-gray-700"
                   }`}
                 >
