@@ -63,6 +63,8 @@ export function Cell({
   columns,
   rows,
   rowValues,
+  onStartEdit,
+  onEndEdit,
 }: {
   value: string;
   i: number;
@@ -73,6 +75,8 @@ export function Cell({
   columns: string[];
   rows: string[][];
   rowValues: RowValues;
+  onStartEdit?: () => void;
+  onEndEdit?: () => void;
 }) {
   const [csv, setCsv] = useAtom(tableAtom);
   const { refs, floatingStyles } = useFloating({
@@ -210,6 +214,7 @@ export function Cell({
             }`}
             value={displayValue}
             onFocus={() => {
+              onStartEdit?.();
               setIsEditing(true);
               currentRowRef.current = i;
               if (inputsRef.current[i]?.[j]?.value) {
@@ -222,6 +227,7 @@ export function Cell({
               setCom(0);
             }}
             onBlur={() => {
+              onEndEdit?.();
               setCom(null);
               setCompletion(false);
               setIsEditing(false);
@@ -264,6 +270,7 @@ export function Cell({
                   });
                   return stringifyCsv(rows);
                 });
+                onStartEdit?.();
               }
             }}
             onKeyDown={(e) => {

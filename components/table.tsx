@@ -3,10 +3,17 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import { Row } from "./row";
-import { useAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { Header } from "./header";
 import { TableFooter } from "./TableFooter";
-import { tableAtom } from "./dataAtom";
+import {
+  commitDraftAtom,
+  redoAtom,
+  resetTableAtom,
+  startDraftAtom,
+  tableAtom,
+  undoAtom,
+} from "./dataAtom";
 import {
   ensureRowLength,
   extractBody,
@@ -27,7 +34,12 @@ export function Table({
   initialCsv?: string;
   initialName: string;
 }) {
-  const [csv, setCsv] = useAtom(tableAtom);
+  const csv = useAtomValue(tableAtom);
+  const resetTable = useSetAtom(resetTableAtom);
+  const undo = useSetAtom(undoAtom);
+  const redo = useSetAtom(redoAtom);
+  const startDraft = useSetAtom(startDraftAtom);
+  const commitDraft = useSetAtom(commitDraftAtom);
   const inputsRef = useRef<HTMLInputElement[][]>([]);
   const currentColRef = useRef<number>(null);
   const colsRef = useRef<(HTMLInputElement | null)[]>([]);
@@ -35,8 +47,8 @@ export function Table({
 
   useEffect(() => {
     const next = initialCsv ?? defaultCsv;
-    setCsv(next);
-  }, [initialCsv, setCsv]);
+    resetTable(next);
+  }, [initialCsv, resetTable]);
 
   useEffect(() => {
     if (!tableId) return;
@@ -79,6 +91,36 @@ export function Table({
     [bodyRows, columns]
   );
 
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.isComposing) return;
+      const key = e.key.toLowerCase();
+      const withModifier = e.metaKey || e.ctrlKey;
+      const isUndo = withModifier && key === "z" && !e.shiftKey;
+      const isRedo =
+        withModifier && (key === "y" || (key === "z" && e.shiftKey));
+      if (!isUndo && !isRedo) return;
+
+      const target = e.target as HTMLElement | null;
+      const isInputElement =
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.isContentEditable;
+      if (isInputElement) return;
+
+      if (isUndo) {
+        e.preventDefault();
+        undo();
+      } else if (isRedo) {
+        e.preventDefault();
+        redo();
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [redo, undo]);
+
   return (
     <div className="p-4 flex justify-center">
       <div className="bg-white inline-block overflow-scroll p-8 shadow border border-gray-200 rounded">
@@ -111,6 +153,8 @@ export function Table({
                 colsRef={colsRef}
                 columns={columns}
                 allRows={bodyRows}
+                onStartEdit={startDraft}
+                onEndEdit={commitDraft}
               />
             ))}
             <TableFooter

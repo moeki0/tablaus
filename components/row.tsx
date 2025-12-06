@@ -16,6 +16,8 @@ export function Row({
   colsRef,
   columns,
   allRows,
+  onStartEdit,
+  onEndEdit,
 }: {
   row: string[];
   rowValues: RowValues;
@@ -25,6 +27,8 @@ export function Row({
   colsRef: RefObject<(HTMLInputElement | null)[]>;
   columns: string[];
   allRows: string[][];
+  onStartEdit?: () => void;
+  onEndEdit?: () => void;
 }) {
   return (
     <tr className=" divide-gray-200 divide-x border-y border-gray-200">
@@ -40,6 +44,8 @@ export function Row({
           columns={columns}
           rows={allRows}
           rowValues={rowValues}
+          onStartEdit={onStartEdit}
+          onEndEdit={onEndEdit}
         />
       ))}
     </tr>

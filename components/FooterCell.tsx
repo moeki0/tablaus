@@ -4,8 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import * as autosizeInput from "autosize-input";
 import { evaluateFormulaContent, stringifyFormulaValue } from "./formula";
 import { parseCsv, stringifyCsv, ensureRowLength } from "./csvTable";
-import { tableAtom } from "./dataAtom";
-import { useAtom } from "jotai";
+import { commitDraftAtom, startDraftAtom, tableAtom } from "./dataAtom";
+import { useAtom, useSetAtom } from "jotai";
 
 export function FooterCell({
   i,
@@ -19,6 +19,8 @@ export function FooterCell({
   bodyRows: string[][];
 }) {
   const [csv, setCsv] = useAtom(tableAtom);
+  const startDraft = useSetAtom(startDraftAtom);
+  const commitDraft = useSetAtom(commitDraftAtom);
   const [editing, setEditing] = useState(false);
   const ref = useRef<HTMLTableCellElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -61,7 +63,13 @@ export function FooterCell({
     <td>
       <input
         ref={inputRef}
-        onBlur={() => setEditing(false)}
+        onBlur={() => {
+          setEditing(false);
+          commitDraft();
+        }}
+        onFocus={() => {
+          startDraft();
+        }}
         className="p-2 bg-gray-100 font-mono outline-0 min-w-full min-h-9"
         value={editing ? value : result}
         onChange={(e) => {

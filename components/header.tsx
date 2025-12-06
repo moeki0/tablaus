@@ -1,14 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-1
-2
-3
-4
-5
-6
-7
-
 import { RefObject, useEffect, useRef } from "react";
 import * as autosizeInput from "autosize-input";
 import {
@@ -17,8 +9,8 @@ import {
   ensureRowLength,
   createEmptyRow,
 } from "./csvTable";
-import { useAtom } from "jotai";
-import { tableAtom } from "./dataAtom";
+import { useAtom, useSetAtom } from "jotai";
+import { commitDraftAtom, startDraftAtom, tableAtom } from "./dataAtom";
 
 export function Header({
   colsRef,
@@ -36,6 +28,8 @@ export function Header({
   currentColRef: RefObject<number | null>;
 }) {
   const [csv, setCsv] = useAtom(tableAtom);
+  const startDraft = useSetAtom(startDraftAtom);
+  const commitDraft = useSetAtom(commitDraftAtom);
   const prevColumns = useRef(columns);
 
   useEffect(() => {
@@ -60,8 +54,12 @@ export function Header({
           colsRef.current[i] = el;
         }}
         onFocus={() => {
+          startDraft();
           currentRowRef.current = -1;
           currentColRef.current = i;
+        }}
+        onBlur={() => {
+          commitDraft();
         }}
         value={c}
         onChange={(e) => {
