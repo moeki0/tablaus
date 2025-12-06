@@ -68,6 +68,7 @@ export function FooterCell({
           commitDraft();
         }}
         onFocus={() => {
+          setEditing(true);
           startDraft();
         }}
         className="p-2 bg-gray-100 font-mono outline-0 min-w-full min-h-9"
