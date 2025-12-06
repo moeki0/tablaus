@@ -17,7 +17,7 @@ export async function GET() {
     .select()
     .from(tables)
     .where(eq(tables.userId, session.user.email))
-    .orderBy(desc(tables.createdAt));
+    .orderBy(desc(tables.updatedAt));
   return NextResponse.json(data);
 }
 
