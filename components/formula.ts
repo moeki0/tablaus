@@ -148,7 +148,10 @@ const runExpression = async (
         return _.sum(array);
       }
       const i = nextContext.columnIndex;
-      if (i !== undefined) {
+      if (
+        i !== undefined &&
+        nextContext.rowIndex === nextContext.rows.length - 1
+      ) {
         return _.sum(
           nextContext.rows
             .map((_, index) => {
@@ -164,7 +167,7 @@ const runExpression = async (
             .filter((v): v is number => typeof v === "number")
         );
       } else {
-        return 0;
+        return null;
       }
     },
     my: prop,
