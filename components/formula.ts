@@ -38,10 +38,10 @@ export const isFormulaContent = (value?: string | null): value is string => {
   return value.trimStart().startsWith("%");
 };
 
-export async function evaluateFormulaContent(
+export function evaluateFormulaContent(
   value: string,
   context: EvalContext
-): Promise<EvaluationResult> {
+): EvaluationResult {
   if (!isFormulaContent(value)) {
     return { isFormula: false, value, error: null };
   }
@@ -50,7 +50,7 @@ export async function evaluateFormulaContent(
     return { isFormula: true, value: null, error: "empty formula" };
   }
   try {
-    const result = await runExpression(expression, context);
+    const result = runExpression(expression, context);
     return { isFormula: true, value: result, error: null };
   } catch (error) {
     return {
@@ -78,10 +78,7 @@ const stripFormulaPrefix = (value: string): string => {
   return expr;
 };
 
-const runExpression = async (
-  expression: string,
-  context: EvalContext
-): Promise<unknown> => {
+const runExpression = (expression: string, context: EvalContext): unknown => {
   if ((context.depth ?? 0) > MAX_RECURSION_DEPTH) {
     throw new Error("formula recursion limit reached");
   }
@@ -108,28 +105,7 @@ const runExpression = async (
 
   const c = new Compartment({
     console,
-    table: async (id?: string) => {
-      if (!id) {
-        return nextContext.rows;
-      }
-      const lookup = nextContext.tableLookup;
-      if (!lookup) return null;
-      try {
-        const data = await lookup(id);
-        if (!data) return null;
-        return data
-          .map((r) =>
-            data[0].reduce<RowValues>((acc, col, idx) => {
-              acc[col] = r[idx] ?? "";
-              return acc;
-            }, {})
-          )
-          .slice(1, data.length - 1);
-      } catch (err) {
-        console.error(err);
-        return null;
-      }
-    },
+    table: () => nextContext.rows,
     columns: nextContext.columns,
     row: nextContext.rowValues,
     rowValues: nextContext.rowValues,
@@ -187,16 +163,16 @@ const runExpression = async (
   });
 
   try {
-    return await c.evaluate(`async () => ${expression}`)();
+    return c.evaluate(expression);
   } catch (e: any) {
     return e.message;
   }
 };
 
-export const resolveProperty = async (
+export const resolveProperty = (
   name: string,
   context: EvalContext
-): Promise<unknown> => {
+): unknown => {
   const idx = context.columns.findIndex(
     (c) => c.toLowerCase() === name.toLowerCase()
   );
@@ -205,7 +181,7 @@ export const resolveProperty = async (
   const valueFromRow = context.rowValues ?? context.rows[context.rowIndex ?? 0];
   const raw = valueFromRow ? valueFromRow[columnName] : null;
   if (typeof raw === "string" && isFormulaContent(raw)) {
-    const evaluated = await evaluateFormulaContent(raw, {
+    const evaluated = evaluateFormulaContent(raw, {
       ...context,
       rowValues: valueFromRow ?? undefined,
     });
