@@ -156,7 +156,7 @@ export function Cell({
       if (eve.error) return `#ERR ${eve.error}`;
       setDisplayValue(stringifyFormulaValue(eve.value));
     });
-  }, [buttonAction, evaluation, isEditing, value]);
+  }, [evaluation, isEditing, value]);
 
   const setCurrent = (newValue: string) => {
     setCsv((csv) => {

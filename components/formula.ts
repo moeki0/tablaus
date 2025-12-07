@@ -101,6 +101,11 @@ const runExpression = async (
     onClick,
   });
 
+  const asyncFilter = async (array: Array<unknown>, predicate: any) => {
+    const results = await Promise.all(array.map(predicate));
+    return array.filter((_, i) => results[i]);
+  };
+
   const c = new Compartment({
     console,
     table: async (id?: string) => {
@@ -130,10 +135,7 @@ const runExpression = async (
     rowValues: nextContext.rowValues,
     rowIndex: nextContext.rowIndex,
     columnIndex: nextContext.columnIndex,
-    asyncFilter: async (array: Array<unknown>, predicate: any) => {
-      const results = await Promise.all(array.map(predicate));
-      return array.filter((_, i) => results[i]);
-    },
+    asyncFilter,
     Math,
     count: (pattern?: string) => {
       const i = nextContext.columnIndex;
@@ -147,26 +149,28 @@ const runExpression = async (
         return 0;
       }
     },
-    sum: (array?: Array<number>) => {
+    sum: async (array?: Array<number>) => {
       if (array) {
         return _.sum(array);
       }
       const i = nextContext.columnIndex;
       if (i !== undefined && nextContext.rowIndex === -1) {
-        return _.sum(
-          nextContext.rows
-            .map((_, index) => {
-              const c = {
-                rows: context.rows,
-                columns: context.columns,
-                rowValues: context.rowValues,
-                rowIndex: index,
-                columnIndex: i,
-              };
-              return parseNumberLike(resolveProperty(context.columns[i], c));
-            })
-            .filter((v): v is number => typeof v === "number")
-        );
+        const res = [];
+        let index = 0;
+        for await (const r of nextContext.rows) {
+          const c = {
+            rows: context.rows,
+            columns: context.columns,
+            rowValues: context.rowValues,
+            rowIndex: index,
+            columnIndex: i,
+          };
+          index += 1;
+          res.push(
+            parseNumberLike(await resolveProperty(context.columns[i], c))
+          );
+        }
+        return _.sum(res);
       } else {
         return null;
       }
