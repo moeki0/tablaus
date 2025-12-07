@@ -11,6 +11,7 @@ export function Row({
   row,
   rowValues,
   i,
+  rowIndex,
   inputsRef,
   currentRowRef,
   colsRef,
@@ -22,6 +23,7 @@ export function Row({
   row: string[];
   rowValues: RowValues;
   i: number;
+  rowIndex: number;
   inputsRef: RefObject<HTMLInputElement[][]>;
   currentRowRef: RefObject<number | null>;
   colsRef: RefObject<(HTMLInputElement | null)[]>;
@@ -39,6 +41,7 @@ export function Row({
           value={row[j] ?? ""}
           j={j}
           i={i}
+          rowIndex={rowIndex}
           currentRowRef={currentRowRef}
           colsRef={colsRef}
           columns={columns}

@@ -38,6 +38,7 @@ export async function POST(request: Request) {
       name,
       csv: initialCsv,
       userId: session.user.email,
+      querySpec: "",
     })
     .returning();
 

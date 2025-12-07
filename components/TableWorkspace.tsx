@@ -14,12 +14,14 @@ export function TableWorkspace({
   tableId,
   initialCsv,
   initialName,
+  initialQuerySpec,
 }: {
   tableList: TableSummary[];
   activeId: string;
   tableId: string;
   initialCsv: string;
   initialName: string;
+  initialQuerySpec: string;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -71,6 +73,7 @@ export function TableWorkspace({
             tableId={tableId}
             initialCsv={initialCsv}
             initialName={initialName}
+            initialQuerySpec={initialQuerySpec}
             onOpenSidebar={() => setSidebarOpen(true)}
           />
           <RecentTableTracker tableId={tableId} />
@@ -85,13 +88,13 @@ export function TableWorkspace({
             maxSize={40}
             className="min-w-[200px]"
           >
-            <div className="h-full border-r border-gray-200 bg-gray-50">
+            <div className="h-full border-gray-200 bg-gray-50">
               <div className="flex h-full flex-col overflow-hidden">
                 <TableSidebar tables={tableList} activeId={activeId} />
               </div>
             </div>
           </Panel>
-          <PanelResizeHandle className="w-1 bg-gray-200  hover:bg-gray-300 -translate-x-0.5 opacity-0 hover:opacity-100 transition focus-visible:outline-blue-500 cursor-col-resize" />
+          <PanelResizeHandle className="w-1 border-gray-200 border-r bg-gray-50 hover:opacity-100 transition focus-visible:outline-blue-500 cursor-col-resize" />
           <Panel>
             <div className="h-screen overflow-auto">
               <Table
@@ -99,6 +102,7 @@ export function TableWorkspace({
                 tableId={tableId}
                 initialCsv={initialCsv}
                 initialName={initialName}
+                initialQuerySpec={initialQuerySpec}
               />
               <RecentTableTracker tableId={tableId} />
             </div>

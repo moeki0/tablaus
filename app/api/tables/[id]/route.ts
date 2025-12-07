@@ -36,6 +36,8 @@ export async function PUT(
   const body = await request.json().catch(() => ({}));
   const csv = typeof body.csv === "string" ? body.csv : null;
   const name = typeof body.name === "string" ? body.name : null;
+  const querySpec =
+    typeof body.querySpec === "string" ? body.querySpec : undefined;
 
   const [existing] = await db
     .select()
@@ -49,6 +51,7 @@ export async function PUT(
         csv: csv ?? "",
         name: name ?? "Untitled",
         userId: session.user.email,
+        querySpec: querySpec ?? "",
       })
       .returning();
     return NextResponse.json(inserted);
@@ -62,6 +65,7 @@ export async function PUT(
     .set({
       csv: csv ?? existing.csv,
       name: name ?? existing.name,
+      querySpec: querySpec ?? existing.querySpec,
       updatedAt: new Date().toISOString(),
     })
     .where(eq(tables.id, id))

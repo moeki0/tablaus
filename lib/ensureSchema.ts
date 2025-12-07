@@ -30,9 +30,11 @@ export async function ensureSchema(pool: Pool) {
         user_id text NOT NULL,
         name text NOT NULL,
         csv text NOT NULL,
+        query_spec text NOT NULL DEFAULT '',
         created_at timestamptz NOT NULL DEFAULT now(),
         updated_at timestamptz NOT NULL DEFAULT now()
       );
+      ALTER TABLE tables ADD COLUMN IF NOT EXISTS query_spec text NOT NULL DEFAULT '';
     `);
     ensured = true;
   } catch (err) {

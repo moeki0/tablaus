@@ -5,6 +5,7 @@ export const tables = pgTable("tables", {
   userId: text("user_id").notNull(),
   name: text("name").notNull(),
   csv: text("csv").notNull(),
+  querySpec: text("query_spec").notNull().default(""),
   createdAt: timestamp("created_at", { mode: "string" })
     .defaultNow()
     .notNull(),

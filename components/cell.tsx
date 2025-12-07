@@ -58,6 +58,7 @@ export function Cell({
   value,
   i,
   j,
+  rowIndex,
   inputsRef,
   currentRowRef,
   colsRef,
@@ -70,6 +71,7 @@ export function Cell({
   value: string;
   i: number;
   j: number;
+  rowIndex: number;
   inputsRef: RefObject<(HTMLInputElement | null)[][]>;
   currentRowRef: RefObject<number | null>;
   colsRef: RefObject<(HTMLInputElement | null)[]>;
@@ -151,7 +153,7 @@ export function Cell({
   const setCurrent = (newValue: string) => {
     setCsv((csv) => {
       const table = parseCsv(csv);
-      const targetIndex = i + 1; // header is 0
+      const targetIndex = rowIndex + 1; // header is 0
       table[targetIndex] = ensureRowLength(table[targetIndex], columns.length);
       table[targetIndex][j] = newValue;
       if (newValue.match(/^% /)) {

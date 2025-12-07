@@ -28,6 +28,7 @@ export default async function TableDetailPage({
         name: "Untitled",
         csv: initialCsv,
         userId: session.user.email,
+        querySpec: "",
       })
       .returning({ id: tables.id });
     redirect(`/tables/${newId}`);
@@ -56,6 +57,7 @@ export default async function TableDetailPage({
         tableId={row.id}
         initialCsv={row.csv}
         initialName={row.name}
+        initialQuerySpec={row.querySpec ?? ""}
       />
     </main>
   );
