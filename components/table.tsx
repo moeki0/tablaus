@@ -275,7 +275,7 @@ export function Table({
         <TableTitle id={tableId!} initialName={initialName} />
       </div>
       <div className="p-4 h-[calc(100vh-80px)] overflow-scroll max-w-full">
-        <div className="flex items-center mb-4 rounded bg-gray-50 pl-2 border border-gray-200 max-w-[250px]">
+        <div className="flex items-center mb-4 text-gray-600 rounded bg-gray-50 pl-2 border border-gray-200 max-w-[250px]">
           <FiFilter className="stroke-gray-500" size={12} />
           <input
             value={querySpec}
