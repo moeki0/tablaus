@@ -102,8 +102,8 @@ export function TableSidebar({
                   key={t.id}
                   href={`/tables/${t.id}`}
                   onClick={onNavigate}
-                  className={`block px-2 md:px-4 py-[5px] rounded text-sm truncate cursor-default transition ${
-                    isActive ? "bg-gray-200 text-gray-900" : "text-gray-700"
+                  className={`block font-semibold px-2 md:px-4 py-[5px] rounded text-sm truncate cursor-default transition ${
+                    isActive ? "bg-gray-200 text-gray-700" : "text-gray-600"
                   }`}
                 >
                   {t.name || "Untitled"}
