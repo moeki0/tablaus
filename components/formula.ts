@@ -11,16 +11,18 @@ import {
 import "ses";
 import { datetime } from "drizzle-orm/mysql-core";
 import { parseNumberLike } from "./number-format";
+import { RowValues } from "./row";
 
-type RowLike = { values: Record<string, string> };
+type TableLookupFn = (id: string) => Promise<string[][] | null | undefined>;
 
 export type EvalContext = {
-  rows: RowLike[];
+  rows: RowValues[];
   columns: string[];
   rowValues?: Record<string, string>;
   rowIndex?: number;
   columnIndex?: number;
   depth?: number;
+  tableLookup?: TableLookupFn;
 };
 
 type EvaluationResult = {
@@ -36,10 +38,10 @@ export const isFormulaContent = (value?: string | null): value is string => {
   return value.trimStart().startsWith("%");
 };
 
-export function evaluateFormulaContent(
+export async function evaluateFormulaContent(
   value: string,
   context: EvalContext
-): EvaluationResult {
+): Promise<EvaluationResult> {
   if (!isFormulaContent(value)) {
     return { isFormula: false, value, error: null };
   }
@@ -48,7 +50,7 @@ export function evaluateFormulaContent(
     return { isFormula: true, value: null, error: "empty formula" };
   }
   try {
-    const result = runExpression(expression, context);
+    const result = await runExpression(expression, context);
     return { isFormula: true, value: result, error: null };
   } catch (error) {
     return {
@@ -76,7 +78,10 @@ const stripFormulaPrefix = (value: string): string => {
   return expr;
 };
 
-const runExpression = (expression: string, context: EvalContext): unknown => {
+const runExpression = async (
+  expression: string,
+  context: EvalContext
+): Promise<unknown> => {
   if ((context.depth ?? 0) > MAX_RECURSION_DEPTH) {
     throw new Error("formula recursion limit reached");
   }
@@ -89,7 +94,7 @@ const runExpression = (expression: string, context: EvalContext): unknown => {
   const prop = (name: string) => resolveProperty(name, nextContext);
   const button = (
     label: string,
-    onClick: (rowIndex: number, columnIndex: number, rows: RowLike[]) => void
+    onClick: (rowIndex: number, columnIndex: number, rows: RowValues[]) => void
   ) => ({
     __button: true as const,
     label,
@@ -98,23 +103,42 @@ const runExpression = (expression: string, context: EvalContext): unknown => {
 
   const c = new Compartment({
     console,
-    rows: nextContext.rows,
+    table: async (id?: string) => {
+      if (!id) {
+        return nextContext.rows;
+      }
+      const lookup = nextContext.tableLookup;
+      if (!lookup) return null;
+      try {
+        const data = await lookup(id);
+        if (!data) return null;
+        return data
+          .map((r) =>
+            nextContext.columns.reduce<RowValues>((acc, col, idx) => {
+              acc[col] = r[idx] ?? "";
+              return acc;
+            }, {})
+          )
+          .slice(1);
+      } catch (err) {
+        console.error(err);
+        return null;
+      }
+    },
     columns: nextContext.columns,
     row: nextContext.rowValues,
     rowValues: nextContext.rowValues,
     rowIndex: nextContext.rowIndex,
     columnIndex: nextContext.columnIndex,
-    Math: Math,
-    _: _ as typeof import("lodash"),
+    Math,
     count: (pattern?: string) => {
       const i = nextContext.columnIndex;
       if (i !== undefined) {
         if (!pattern) {
           return nextContext.rows.length;
         }
-        return nextContext.rows.filter(
-          (r) => Object.values(r.values)[i] === pattern
-        ).length;
+        return nextContext.rows.filter((r) => Object.values(r)[i] === pattern)
+          .length;
       } else {
         return 0;
       }
@@ -152,26 +176,25 @@ const runExpression = (expression: string, context: EvalContext): unknown => {
   });
 
   try {
-    return c.evaluate(expression);
+    return await c.evaluate(`async () => ${expression}`)();
   } catch (e: any) {
     return e.message;
   }
 };
 
-export const resolveProperty = (
+export const resolveProperty = async (
   name: string,
   context: EvalContext
-): unknown => {
+): Promise<unknown> => {
   const idx = context.columns.findIndex(
     (c) => c.toLowerCase() === name.toLowerCase()
   );
   if (idx === -1) return null;
   const columnName = context.columns[idx];
-  const valueFromRow =
-    context.rowValues ?? context.rows[context.rowIndex ?? 0]?.values;
+  const valueFromRow = context.rowValues ?? context.rows[context.rowIndex ?? 0];
   const raw = valueFromRow ? valueFromRow[columnName] : null;
   if (typeof raw === "string" && isFormulaContent(raw)) {
-    const evaluated = evaluateFormulaContent(raw, {
+    const evaluated = await evaluateFormulaContent(raw, {
       ...context,
       rowValues: valueFromRow ?? undefined,
     });

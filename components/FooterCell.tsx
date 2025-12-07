@@ -12,11 +12,13 @@ export function FooterCell({
   value,
   columns,
   bodyRows,
+  tableLookup,
 }: {
   i: number;
   value: string;
   columns: string[];
   bodyRows: string[][];
+  tableLookup?: (id: string) => Promise<string[][] | null | undefined>;
 }) {
   const [csv, setCsv] = useAtom(tableAtom);
   const startDraft = useSetAtom(startDraftAtom);
@@ -36,20 +38,22 @@ export function FooterCell({
     [bodyRows, columns]
   );
 
-  const evaluation = useMemo(() => {
-    if (!value) return null;
-    return evaluateFormulaContent(value, {
-      rows: rowObjects.map((r) => ({ values: r })),
+  const evaluation = async () => {
+    return await evaluateFormulaContent(value, {
+      rows: rowObjects,
       columns,
       columnIndex: i,
+      tableLookup,
     });
-  }, [columns, i, rowObjects, value]);
+  };
 
-  const result = useMemo(() => {
-    if (!value) return "";
-    if (!evaluation || !evaluation.isFormula) return value;
-    if (evaluation.error) return `#ERR ${evaluation.error}`;
-    return stringifyFormulaValue(evaluation.value);
+  const [result, setResult] = useState<string | null>(null);
+
+  useEffect(() => {
+    evaluation().then((eve) => {
+      if (!eve) return "";
+      setResult(stringifyFormulaValue(eve.value));
+    });
   }, [evaluation, value]);
 
   useEffect(() => {
@@ -74,7 +78,7 @@ export function FooterCell({
         className={`p-2  ${
           editing ? "font-mono bg-white" : "bg-gray-100"
         } outline-0 min-w-full min-h-9`}
-        value={editing ? value : result}
+        value={editing ? value : result || ""}
         onChange={(e) => {
           setCsv((csv) => {
             const table = parseCsv(csv);

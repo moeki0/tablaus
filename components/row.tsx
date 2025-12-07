@@ -19,6 +19,7 @@ export function Row({
   allRows,
   onStartEdit,
   onEndEdit,
+  tableLookup,
 }: {
   row: string[];
   rowValues: RowValues;
@@ -31,6 +32,7 @@ export function Row({
   allRows: string[][];
   onStartEdit?: () => void;
   onEndEdit?: () => void;
+  tableLookup?: (id: string) => Promise<string[][] | null | undefined>;
 }) {
   return (
     <tr className=" divide-gray-200 divide-x border border-gray-200">
@@ -49,6 +51,7 @@ export function Row({
           rowValues={rowValues}
           onStartEdit={onStartEdit}
           onEndEdit={onEndEdit}
+          tableLookup={tableLookup}
         />
       ))}
     </tr>

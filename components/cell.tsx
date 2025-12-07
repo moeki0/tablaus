@@ -67,6 +67,7 @@ export function Cell({
   rowValues,
   onStartEdit,
   onEndEdit,
+  tableLookup,
 }: {
   value: string;
   i: number;
@@ -80,6 +81,7 @@ export function Cell({
   rowValues: RowValues;
   onStartEdit?: () => void;
   onEndEdit?: () => void;
+  tableLookup?: (id: string) => Promise<string[][] | null | undefined>;
 }) {
   const [csv, setCsv] = useAtom(tableAtom);
   const { refs, floatingStyles } = useFloating({
@@ -120,34 +122,40 @@ export function Cell({
     [columns, rows]
   );
 
-  const evaluation = useMemo(
-    () =>
-      evaluateFormulaContent(value ?? "", {
-        rows: rowsForEval.map((r) => ({ values: r })),
-        columns,
-        rowValues,
-        rowIndex: i,
-        columnIndex: j,
-      }),
-    [columns, i, j, rowValues, rowsForEval, value]
-  );
-  const buttonAction =
-    evaluation.isFormula &&
-    evaluation.value &&
-    typeof evaluation.value === "object" &&
-    (evaluation.value as any).__button
-      ? (evaluation.value as {
-          label: string;
-          onClick: (rows: Record<string, string>[], rowIndex: number) => void;
-        })
-      : null;
-  const displayValue = useMemo(() => {
-    if (buttonAction && isEditing) return value || "";
-    if (buttonAction && !isEditing) return "";
-    if (isEditing) return value || "";
-    if (!evaluation.isFormula) return value || "";
-    if (evaluation.error) return `#ERR ${evaluation.error}`;
-    return stringifyFormulaValue(evaluation.value);
+  const evaluation = async () => {
+    return evaluateFormulaContent(value ?? "", {
+      rows: rowsForEval,
+      columns,
+      rowValues,
+      rowIndex: i,
+      columnIndex: j,
+      tableLookup,
+    });
+  };
+  const [buttonAction, setButtonAction] = useState<{
+    label: string;
+    onClick: (rows: Record<string, string>[], rowIndex: number) => void;
+  } | null>(null);
+  const [displayValue, setDisplayValue] = useState<string | null>(null);
+  useEffect(() => {
+    evaluation().then((eve) => {
+      setButtonAction(
+        eve.isFormula &&
+          eve.value &&
+          typeof eve.value === "object" &&
+          (eve.value as any).__button
+          ? (eve.value as {
+              label: string;
+              onClick: (
+                rows: Record<string, string>[],
+                rowIndex: number
+              ) => void;
+            })
+          : null
+      );
+      if (eve.error) return `#ERR ${eve.error}`;
+      setDisplayValue(stringifyFormulaValue(eve.value));
+    });
   }, [buttonAction, evaluation, isEditing, value]);
 
   const setCurrent = (newValue: string) => {
@@ -214,11 +222,11 @@ export function Cell({
               inputsRef.current[i][j] = el;
             }}
             className={`p-2 text-[16px] ${
-              !isEditing && !displayValue.match(/\[[x ]\]/) && "font-sans!"
+              !isEditing && !displayValue?.match(/\[[x ]\]/) && "font-sans!"
             } outline-0 min-w-full ${
               !(!buttonAction || isEditing) && "hidden"
-            } ${displayValue.match(/\[(x|\s)\]/) ? "font-mono!" : ""}`}
-            value={displayValue}
+            } ${displayValue?.match(/\[(x|\s)\]/) ? "font-mono!" : ""}`}
+            value={isEditing ? value : displayValue || ""}
             onFocus={() => {
               onStartEdit?.();
               setIsEditing(true);
@@ -355,7 +363,6 @@ export function Cell({
               if (com === null && e.key === "Tab" && !e.shiftKey) {
                 setCompletion(false);
                 setCom(null);
-                console.log(i, j, rows.length, columns.length);
                 if (i <= rows.length - 1 && j < columns.length - 1) {
                   inputsRef.current[i]?.[j + 1]?.focus();
                 } else if (i < rows.length - 1) {
