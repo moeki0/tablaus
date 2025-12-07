@@ -13,7 +13,13 @@ import { datetime } from "drizzle-orm/mysql-core";
 import { parseNumberLike } from "./number-format";
 import { RowValues } from "./row";
 
-type TableLookupFn = (id: string) => Promise<string[][] | null | undefined>;
+type TableLookupFn = (id: string) => {
+  id: string;
+  name: string;
+  columns: string[];
+  rows: RowValues[];
+  footer: string[];
+} | null;
 
 export type EvalContext = {
   rows: RowValues[];
@@ -98,11 +104,6 @@ const runExpression = (expression: string, context: EvalContext): unknown => {
     onClick,
   });
 
-  const asyncFilter = async (array: Array<unknown>, predicate: any) => {
-    const results = await Promise.all(array.map(predicate));
-    return array.filter((_, i) => results[i]);
-  };
-
   const c = new Compartment({
     console,
     table: () => nextContext.rows,
@@ -111,7 +112,6 @@ const runExpression = (expression: string, context: EvalContext): unknown => {
     rowValues: nextContext.rowValues,
     rowIndex: nextContext.rowIndex,
     columnIndex: nextContext.columnIndex,
-    asyncFilter,
     Math,
     count: (pattern?: string) => {
       const i = nextContext.columnIndex;
@@ -125,30 +125,25 @@ const runExpression = (expression: string, context: EvalContext): unknown => {
         return 0;
       }
     },
-    sum: async (array?: Array<number>) => {
-      if (array) {
-        return _.sum(array);
-      }
+    sum: () => {
       const i = nextContext.columnIndex;
       if (i !== undefined && nextContext.rowIndex === -1) {
-        const res = [];
-        let index = 0;
-        for await (const r of nextContext.rows) {
-          const c = {
-            rows: context.rows,
-            columns: context.columns,
-            rowValues: context.rowValues,
-            rowIndex: index,
-            columnIndex: i,
-          };
-          index += 1;
-          res.push(
-            parseNumberLike(await resolveProperty(context.columns[i], c))
-          );
-        }
-        return _.sum(res);
+        return _.sum(
+          nextContext.rows
+            .map((_, index) => {
+              const c = {
+                rows: context.rows,
+                columns: context.columns,
+                rowValues: context.rowValues,
+                rowIndex: index,
+                columnIndex: i,
+              };
+              return parseNumberLike(resolveProperty(context.columns[i], c));
+            })
+            .filter((v): v is number => typeof v === "number")
+        );
       } else {
-        return null;
+        return 0;
       }
     },
     my: prop,
