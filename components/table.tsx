@@ -35,6 +35,7 @@ type ParsedFilter = {
   kind: "regex" | "text";
   value: string;
   flags?: string;
+  not: boolean;
 };
 
 type ParsedSort = {
@@ -48,12 +49,13 @@ function parseQuerySpec(spec: string): {
 } {
   const filters: ParsedFilter[] = [];
   const sorts: ParsedSort[] = [];
-  const regex = /"([^"]+)"\s*:\s*([^\s]+)/g;
+  const regex = /(-?)"([^"]+)"\s*:\s*([^\s]+)/g;
   let match: RegExpExecArray | null;
 
   while ((match = regex.exec(spec))) {
-    const column = match[1];
-    const raw = match[2];
+    const not = match[1];
+    const column = match[2];
+    const raw = match[3];
     const upper = raw.toUpperCase();
 
     if (upper === "ASC" || upper === "DESC") {
@@ -67,6 +69,7 @@ function parseQuerySpec(spec: string): {
         filters.push({
           column,
           kind: "regex",
+          not: not === "-",
           value: regexMatch[1],
           flags: regexMatch[2],
         });
@@ -75,7 +78,7 @@ function parseQuerySpec(spec: string): {
     }
 
     const trimmed = raw.replace(/^["']|["']$/g, "");
-    filters.push({ column, kind: "text", value: trimmed });
+    filters.push({ column, kind: "text", not: not === "-", value: trimmed });
   }
 
   return { filters, sorts };
@@ -181,9 +184,10 @@ export function Table({
                 rowIndex: row.originalIndex,
                 columnIndex,
               };
-              return reg.test(
+              const res = reg.test(
                 String(resolveProperty(columns[columnIndex], ctx)) ?? ""
               );
+              return f.not ? !res : res;
             };
           } catch {
             return null;
@@ -200,7 +204,7 @@ export function Table({
           };
           const res =
             String(resolveProperty(columns[columnIndex], ctx)) === needle;
-          return res;
+          return f.not ? !res : res;
         };
       })
       .filter(Boolean) as ((row: {
