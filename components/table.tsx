@@ -49,7 +49,7 @@ function parseQuerySpec(spec: string): {
 } {
   const filters: ParsedFilter[] = [];
   const sorts: ParsedSort[] = [];
-  const regex = /(-?)"([^"]+)"\s*:\s*([^\s]+)/g;
+  const regex = /(-?)"([^"]+)"\s*:\s*(DESC|ASC|".*")/g;
   let match: RegExpExecArray | null;
 
   while ((match = regex.exec(spec))) {
