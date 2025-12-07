@@ -119,7 +119,7 @@ const runExpression = async (
               return acc;
             }, {})
           )
-          .slice(1);
+          .slice(1, data.length - 2);
       } catch (err) {
         console.error(err);
         return null;
