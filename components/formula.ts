@@ -13,7 +13,7 @@ import { datetime } from "drizzle-orm/mysql-core";
 
 type RowLike = { values: Record<string, string> };
 
-type EvalContext = {
+export type EvalContext = {
   rows: RowLike[];
   columns: string[];
   rowValues?: Record<string, string>;
@@ -157,7 +157,10 @@ const runExpression = (expression: string, context: EvalContext): unknown => {
   }
 };
 
-const resolveProperty = (name: string, context: EvalContext): unknown => {
+export const resolveProperty = (
+  name: string,
+  context: EvalContext
+): unknown => {
   const idx = context.columns.findIndex(
     (c) => c.toLowerCase() === name.toLowerCase()
   );

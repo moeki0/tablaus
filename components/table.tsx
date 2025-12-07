@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/preserve-manual-memoization */
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
@@ -26,6 +27,7 @@ import { initialCsv as defaultCsv } from "./csvTable";
 import { TableTitle } from "./TableTitle";
 import { emitTableUpdated } from "@/lib/tableUpdateEvent";
 import { FiFilter, FiSidebar } from "react-icons/fi";
+import { EvalContext, resolveProperty } from "./formula";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 type ParsedFilter = {
@@ -147,6 +149,17 @@ export function Table({
 
   const parsedQuery = useMemo(() => parseQuerySpec(querySpec), [querySpec]);
 
+  const rowsForEval = useMemo(
+    () =>
+      rawBodyRows.map((r) =>
+        columns.reduce<RowValues>((acc, col, idx) => {
+          acc[col] = r[idx] ?? "";
+          return acc;
+        }, {})
+      ),
+    [columns, rawBodyRows]
+  );
+
   const visibleRows = useMemo(() => {
     const rowsWithIndex = rawBodyRows.map((row, idx) => ({
       row: ensureRowLength(row, columns.length),
@@ -160,15 +173,35 @@ export function Table({
         if (f.kind === "regex") {
           try {
             const reg = new RegExp(f.value, f.flags);
-            return (row: (typeof rowsWithIndex)[number]) =>
-              reg.test(row.row[columnIndex] ?? "");
+            return (row: (typeof rowsWithIndex)[number]) => {
+              const ctx: EvalContext = {
+                rows: rowsForEval.map((r) => ({ values: r })),
+                columns,
+                rowValues: rowsForEval[row.originalIndex],
+                rowIndex: row.originalIndex,
+                columnIndex,
+              };
+              return reg.test(
+                String(resolveProperty(columns[columnIndex], ctx)) ?? ""
+              );
+            };
           } catch {
             return null;
           }
         }
         const needle = f.value.toLowerCase();
-        return (row: (typeof rowsWithIndex)[number]) =>
-          (row.row[columnIndex] ?? "").toLowerCase().includes(needle);
+        return (row: (typeof rowsWithIndex)[number]) => {
+          const ctx: EvalContext = {
+            rows: rowsForEval.map((r) => ({ values: r })),
+            columns,
+            rowValues: rowsForEval[row.originalIndex],
+            rowIndex: row.originalIndex,
+            columnIndex,
+          };
+          const res =
+            String(resolveProperty(columns[columnIndex], ctx)) === needle;
+          return res;
+        };
       })
       .filter(Boolean) as ((row: {
       row: string[];
