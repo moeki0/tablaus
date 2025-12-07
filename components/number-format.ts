@@ -4,10 +4,8 @@ export const parseNumberLike = (value: unknown): number | null => {
   }
   if (typeof value !== "string") return null;
 
-  const cleaned = value
-    .replace(/[$￥¥,\s]/g, "")
-    .trim();
-p
+  const cleaned = value.replace(/[$￥¥,\s]/g, "").trim();
+
   if (!cleaned) return null;
 
   const num = Number(cleaned);
