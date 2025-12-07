@@ -152,10 +152,7 @@ const runExpression = async (
         return _.sum(array);
       }
       const i = nextContext.columnIndex;
-      if (
-        i !== undefined &&
-        nextContext.rowIndex === nextContext.rows.length - 1
-      ) {
+      if (i !== undefined && nextContext.rowIndex === -1) {
         return _.sum(
           nextContext.rows
             .map((_, index) => {
