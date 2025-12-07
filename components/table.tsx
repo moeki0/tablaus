@@ -491,7 +491,9 @@ export function Table({
                   onClick: () => {
                     setQuerySpec(s.query);
                     setSuggestOpen(false);
-                    queryInputRef.current?.focus();
+                    setTimeout(() => {
+                      queryInputRef.current?.focus();
+                    });
                   },
                   onMouseEnter: () => setActiveIndex(idx),
                   onMouseLeave: () => setActiveIndex(null),
