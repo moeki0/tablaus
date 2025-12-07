@@ -143,7 +143,7 @@ const runExpression = async (
         return 0;
       }
     },
-    sum: (array: Array<number>) => {
+    sum: (array?: Array<number>) => {
       if (array) {
         return _.sum(array);
       }
