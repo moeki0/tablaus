@@ -4,7 +4,7 @@
 
 import { useFloating } from "@floating-ui/react";
 import { createPortal } from "react-dom";
-import { RefObject, useEffect, useMemo, useState } from "react";
+import { RefObject, useCallback, useEffect, useMemo, useState } from "react";
 import _ from "lodash";
 import { addDays, format, isValid, parse } from "date-fns";
 import * as autosizeInput from "autosize-input";
@@ -122,7 +122,7 @@ export function Cell({
     [columns, rows]
   );
 
-  const evaluation = async () => {
+  const evaluation = useCallback(async () => {
     return evaluateFormulaContent(value ?? "", {
       rows: rowsForEval,
       columns,
@@ -131,7 +131,7 @@ export function Cell({
       columnIndex: j,
       tableLookup,
     });
-  };
+  }, [columns, i, j, rowValues, rowsForEval, tableLookup, value]);
   const [buttonAction, setButtonAction] = useState<{
     label: string;
     onClick: (rows: Record<string, string>[], rowIndex: number) => void;
@@ -156,7 +156,7 @@ export function Cell({
       if (eve.error) return `#ERR ${eve.error}`;
       setDisplayValue(stringifyFormulaValue(eve.value));
     });
-  }, [isEditing, value]);
+  }, [evaluation, isEditing, value]);
 
   const setCurrent = (newValue: string) => {
     setCsv((csv) => {
