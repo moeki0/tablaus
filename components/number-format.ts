@@ -7,7 +7,7 @@ export const parseNumberLike = (value: unknown): number | null => {
   const cleaned = value
     .replace(/[$￥¥,\s]/g, "")
     .trim();
-
+p
   if (!cleaned) return null;
 
   const num = Number(cleaned);

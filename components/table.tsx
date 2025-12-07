@@ -42,9 +42,12 @@ import {
   useDismiss,
   useFloating,
   useInteractions,
+  useListNavigation,
+  useRole,
   offset,
   flip,
   shift,
+  useMergeRefs,
 } from "@floating-ui/react";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -148,6 +151,33 @@ export function Table({
     click,
     dismiss,
   ]);
+  const [suggestOpen, setSuggestOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const suggestListRef = useRef<Array<HTMLButtonElement | null>>([]);
+  const {
+    refs: suggestRefs,
+    floatingStyles: suggestStyles,
+    context: suggestContext,
+  } = useFloating({
+    placement: "bottom-start",
+    open: suggestOpen,
+    onOpenChange: setSuggestOpen,
+    middleware: [offset(6), flip(), shift({ padding: 8 })],
+    whileElementsMounted: autoUpdate,
+  });
+  const suggestRole = useRole(suggestContext, { role: "listbox" });
+  const suggestDismiss = useDismiss(suggestContext);
+  const suggestListNav = useListNavigation(suggestContext, {
+    listRef: suggestListRef,
+    activeIndex,
+    onNavigate: setActiveIndex,
+    loop: true,
+  });
+  const {
+    getReferenceProps: getSuggestRefProps,
+    getFloatingProps: getSuggestFloatingProps,
+    getItemProps,
+  } = useInteractions([suggestRole, suggestDismiss, suggestListNav]);
 
   useEffect(() => {
     const next = initialCsv ?? defaultCsv;
@@ -183,6 +213,8 @@ export function Table({
       clearTimeout(id);
     };
   }, [csv, querySpec, tableId]);
+
+  const queryInputRef = useRef<HTMLInputElement | null>(null);
 
   const parsedTable = useMemo(() => parseCsv(csv), [csv]);
   const columns = useMemo(() => extractColumns(parsedTable), [parsedTable]);
@@ -295,6 +327,38 @@ export function Table({
     [visibleRows]
   );
 
+  const mergedQueryRef = useMergeRefs([
+    suggestRefs.setReference,
+    queryInputRef,
+  ]);
+
+  const firstColumn = columns[0] ?? "";
+  const suggestions = firstColumn
+    ? [
+        {
+          query: `"${firstColumn}":DESC`,
+          description: "Sort from largest to smallest",
+        },
+        {
+          query: `"${firstColumn}":ASC`,
+          description: "Sort from smallest to largest",
+        },
+        { query: `"${firstColumn}":""`, description: "Include" },
+        { query: `-"${firstColumn}":""`, description: "Exclude" },
+        {
+          query: `"${firstColumn}":/regexp/`,
+          description: "Regular Expression",
+        },
+      ]
+    : [];
+  useEffect(() => {
+    if (!suggestOpen) {
+      setTimeout(() => {
+        queryInputRef.current?.focus();
+      });
+    }
+  }, [suggestOpen]);
+
   const bodyRowObjects: RowValues[] = useMemo(
     () =>
       visibleRows.map(({ row }) =>
@@ -401,11 +465,53 @@ export function Table({
           <FiFilter className="stroke-gray-500" size={14} />
           <input
             value={querySpec}
-            onChange={(e) => setQuerySpec(e.target.value)}
+            onChange={(e) => {
+              setQuerySpec(e.target.value);
+              setSuggestOpen(!e.target.value.trim() && suggestions.length > 0);
+            }}
             className="flex-1 bg-transparent px-1 py-1 text-sm outline-0"
             aria-label="Query"
+            ref={mergedQueryRef}
+            {...getSuggestRefProps({
+              onFocus: () => {
+                if (!querySpec.trim() && suggestions.length > 0) {
+                  setSuggestOpen(true);
+                }
+              },
+            })}
           />
         </div>
+        {suggestOpen && suggestions.length ? (
+          <div
+            ref={suggestRefs.setFloating}
+            style={suggestStyles}
+            {...getSuggestFloatingProps()}
+            className="z-30 mt-1 w-80 rounded border border-gray-200 bg-white shadow-lg overflow-hidden"
+          >
+            {suggestions.map((s, idx) => (
+              <button
+                key={s.query}
+                ref={(node) => {
+                  suggestListRef.current[idx] = node;
+                }}
+                {...getItemProps({
+                  onClick: () => {
+                    setQuerySpec(s.query);
+                    setSuggestOpen(false);
+                  },
+                  onMouseEnter: () => setActiveIndex(idx),
+                  onMouseLeave: () => setActiveIndex(null),
+                })}
+                className={`flex w-full items-center justify-between px-3 py-2 text-sm text-left hover:bg-gray-50 ${
+                  activeIndex === idx ? "bg-gray-50" : ""
+                }`}
+              >
+                <span className="truncate">{s.query}</span>
+                <span className="text-gray-400 text-xs">{s.description}</span>
+              </button>
+            ))}
+          </div>
+        ) : null}
         <div className="relative" ref={menuRef}>
           <button
             type="button"
