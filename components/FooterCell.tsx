@@ -42,6 +42,7 @@ export function FooterCell({
       rows: rowObjects,
       columns,
       columnIndex: i,
+      rowIndex: -1,
     });
   }, [columns, i, rowObjects, value]);
 

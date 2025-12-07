@@ -129,7 +129,6 @@ export function Cell({
       rowValues,
       rowIndex: i,
       columnIndex: j,
-      tableLookup,
     });
   }, [columns, i, j, rowValues, rowsForEval, tableLookup, value]);
   const [buttonAction, setButtonAction] = useState<{
