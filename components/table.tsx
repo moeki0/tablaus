@@ -462,7 +462,7 @@ export function Table({
               setQuerySpec(e.target.value);
               setSuggestOpen(!e.target.value.trim() && suggestions.length > 0);
             }}
-            className="flex-1 bg-transparent px-1 py-1 text-sm outline-0"
+            className="flex-1 bg-transparent px-1 py-1 outline-0"
             aria-label="Query"
             ref={mergedQueryRef}
             {...getSuggestRefProps({
