@@ -114,7 +114,7 @@ const runExpression = async (
         if (!data) return null;
         return data
           .map((r) =>
-            nextContext.columns.reduce<RowValues>((acc, col, idx) => {
+            data[0].reduce<RowValues>((acc, col, idx) => {
               acc[col] = r[idx] ?? "";
               return acc;
             }, {})
