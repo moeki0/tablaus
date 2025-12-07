@@ -30,7 +30,7 @@ export function Header({
   const [csv, setCsv] = useAtom(tableAtom);
   const startDraft = useSetAtom(startDraftAtom);
   const commitDraft = useSetAtom(commitDraftAtom);
-  const prevColumns = useRef(columns);
+  const prevColumns = useRef<string[]>(null);
 
   useEffect(() => {
     autosizeInput(colsRef.current[i]);
@@ -39,7 +39,8 @@ export function Header({
   useEffect(() => {
     if (
       currentColRef.current === i &&
-      (prevColumns.current.length !== columns.length ||
+      (prevColumns.current === null ||
+        prevColumns.current.length !== columns.length ||
         prevColumns.current.join("") !== columns.join(""))
     ) {
       colsRef.current[i]?.focus();
