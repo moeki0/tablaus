@@ -317,8 +317,7 @@ export function Table({
           <input
             value={querySpec}
             onChange={(e) => setQuerySpec(e.target.value)}
-            className="w-full max-w-[250px] flex-1 ml-2 py-1 text-sm  outline-0"
-            placeholder={`"Col1":DESC "Col1":"foo" "Col2":/^test-/`}
+            className="max-w-[250px] flex-1 ml-2 py-1 text-sm  outline-0"
             aria-label="並び替え・フィルタ指定"
           />
         </div>
