@@ -33,6 +33,7 @@ import {
   FiMoreHorizontal,
   FiDownload,
   FiCopy,
+  FiTrash2,
 } from "react-icons/fi";
 import { EvalContext, resolveProperty } from "./formula";
 import { useRouter } from "next/navigation";
@@ -411,6 +412,26 @@ export function Table({
     }
   };
 
+  const handleDelete = async () => {
+    if (!tableId) return;
+    const ok = window.confirm("Are you sure you want to delete this table?");
+    if (!ok) return;
+
+    try {
+      const res = await fetch(`/api/tables/${tableId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Failed to delete");
+      emitTableUpdated(tableId);
+      router.push("/");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete. Please try again later.");
+    } finally {
+      setMenuOpen(false);
+    }
+  };
+
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.isComposing) return;
@@ -542,6 +563,14 @@ export function Table({
               >
                 <FiCopy />
                 Duplicate
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 text-red-600"
+              >
+                <FiTrash2 />
+                Delete
               </button>
             </div>
           ) : null}

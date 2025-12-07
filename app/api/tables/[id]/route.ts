@@ -73,3 +73,26 @@ export async function PUT(
 
   return NextResponse.json(updated);
 }
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  await ensureSchema(pool);
+  const { id } = await params;
+  const session = await auth();
+  if (!session?.user?.email) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const [existing] = await db
+    .select()
+    .from(tables)
+    .where(eq(tables.id, id));
+  if (!existing || existing.userId !== session.user.email) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  await db.delete(tables).where(eq(tables.id, id));
+  return NextResponse.json({ success: true }, { status: 200 });
+}
