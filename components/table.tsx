@@ -548,7 +548,7 @@ export function Table({
       <div className="p-4 h-[calc(100vh-50px)] overflow-scroll max-w-full">
         <table>
           <thead>
-            <tr className="border border-gray-200 divide-gray-200 divide-x">
+            <tr className="border border-gray-300 divide-gray-300 divide-x bg-gray-200">
               {columns.map((c, i) => (
                 <Header
                   colsRef={colsRef}
