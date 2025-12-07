@@ -351,13 +351,6 @@ export function Table({
         },
       ]
     : [];
-  useEffect(() => {
-    if (!suggestOpen) {
-      setTimeout(() => {
-        queryInputRef.current?.focus();
-      });
-    }
-  }, [suggestOpen]);
 
   const bodyRowObjects: RowValues[] = useMemo(
     () =>
@@ -498,6 +491,7 @@ export function Table({
                   onClick: () => {
                     setQuerySpec(s.query);
                     setSuggestOpen(false);
+                    queryInputRef.current?.focus();
                   },
                   onMouseEnter: () => setActiveIndex(idx),
                   onMouseLeave: () => setActiveIndex(null),
