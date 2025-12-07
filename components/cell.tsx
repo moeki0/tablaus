@@ -192,7 +192,7 @@ export function Cell({
       inputsRef.current[i][j].value ||= " ";
       autosizeInput(inputsRef.current[i]?.[j]);
     }
-  }, [i, inputsRef, j, displayValue]);
+  }, [i, inputsRef, j, displayValue, isEditing]);
 
   useEffect(() => {
     if (inputsRef.current[i]?.[j]) {
