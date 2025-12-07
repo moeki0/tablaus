@@ -31,14 +31,19 @@ export async function POST(request: Request) {
   const name = typeof body.name === "string" && body.name.trim()
     ? body.name.trim()
     : "Untitled";
+  const csv =
+    typeof body.csv === "string" && body.csv.length > 0
+      ? body.csv
+      : initialCsv;
+  const querySpec = typeof body.querySpec === "string" ? body.querySpec : "";
 
   const [inserted] = await db
     .insert(tables)
     .values({
       name,
-      csv: initialCsv,
+      csv,
       userId: session.user.email,
-      querySpec: "",
+      querySpec,
     })
     .returning();
 

@@ -21,13 +21,31 @@ import {
   extractColumns,
   extractFooter,
   parseCsv,
+  stringifyCsv,
 } from "./csvTable";
 import type { RowValues } from "./row";
 import { initialCsv as defaultCsv } from "./csvTable";
 import { TableTitle } from "./TableTitle";
 import { emitTableUpdated } from "@/lib/tableUpdateEvent";
-import { FiFilter, FiSidebar } from "react-icons/fi";
+import {
+  FiFilter,
+  FiSidebar,
+  FiMoreHorizontal,
+  FiDownload,
+  FiCopy,
+} from "react-icons/fi";
 import { EvalContext, resolveProperty } from "./formula";
+import { useRouter } from "next/navigation";
+import {
+  autoUpdate,
+  useClick,
+  useDismiss,
+  useFloating,
+  useInteractions,
+  offset,
+  flip,
+  shift,
+} from "@floating-ui/react";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 type ParsedFilter = {
@@ -97,8 +115,10 @@ export function Table({
   initialQuerySpec?: string;
   onOpenSidebar?: () => void;
 }) {
+  const router = useRouter();
   const csv = useAtomValue(tableAtom);
   const [querySpec, setQuerySpec] = useState(initialQuerySpec ?? "");
+  const [menuOpen, setMenuOpen] = useState(false);
   const resetTable = useSetAtom(resetTableAtom);
   const undo = useSetAtom(undoAtom);
   const redo = useSetAtom(redoAtom);
@@ -109,6 +129,25 @@ export function Table({
   const colsRef = useRef<(HTMLInputElement | null)[]>([]);
   const currentRowRef = useRef<number | null>(null);
   const savedRef = useRef({ csv, querySpec: initialQuerySpec ?? "" });
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  const {
+    refs: floatingRefs,
+    floatingStyles,
+    context: floatingContext,
+  } = useFloating({
+    placement: "bottom-end",
+    open: menuOpen,
+    onOpenChange: setMenuOpen,
+    middleware: [offset(6), flip(), shift({ padding: 8 })],
+    whileElementsMounted: autoUpdate,
+  });
+  const click = useClick(floatingContext);
+  const dismiss = useDismiss(floatingContext);
+  const { getReferenceProps, getFloatingProps } = useInteractions([
+    click,
+    dismiss,
+  ]);
 
   useEffect(() => {
     const next = initialCsv ?? defaultCsv;
@@ -267,6 +306,54 @@ export function Table({
     [columns, visibleRows]
   );
 
+  const downloadFile = (content: BlobPart, type: string, filename: string) => {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadCsv = () => {
+    downloadFile(
+      csv,
+      "text/csv;charset=utf-8",
+      `${initialName || "table"}.csv`
+    );
+    setMenuOpen(false);
+  };
+
+  const handleDuplicate = async () => {
+    const header = columns.length ? columns : [];
+    const firstRow = rawBodyRows.length
+      ? ensureRowLength(rawBodyRows[0], columns.length)
+      : ensureRowLength([], columns.length);
+    const footerRow = footer.length
+      ? ensureRowLength(footer, columns.length)
+      : ensureRowLength([], columns.length);
+    const duplicateCsv = stringifyCsv([header, firstRow, footerRow]);
+
+    try {
+      const res = await fetch("/api/tables", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: `${initialName} Copy`,
+          csv: duplicateCsv,
+          querySpec,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to duplicate");
+      const data = await res.json();
+      setMenuOpen(false);
+      router.push(`/tables/${data.id}`);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.isComposing) return;
@@ -310,17 +397,55 @@ export function Table({
           </button>
         ) : null}
         <TableTitle id={tableId!} initialName={initialName} />
-      </div>
-      <div className="p-4 h-[calc(100vh-80px)] overflow-scroll max-w-full">
-        <div className="flex items-center mb-4 text-gray-500 rounded bg-gray-50 pl-2 border border-gray-200 max-w-[250px]">
-          <FiFilter className="stroke-gray-500" size={12} />
+        <div className="flex items-center gap-2 bg-gray-50 rounded border border-gray-200 px-2 py-1 flex-1 max-w-[250px]">
+          <FiFilter className="stroke-gray-500" size={14} />
           <input
             value={querySpec}
             onChange={(e) => setQuerySpec(e.target.value)}
-            className="max-w-[250px] flex-1 ml-2 py-1 text-sm  outline-0"
-            aria-label="並び替え・フィルタ指定"
+            className="flex-1 bg-transparent py-1 text-sm outline-0"
+            aria-label="Query"
           />
         </div>
+        <div className="relative" ref={menuRef}>
+          <button
+            type="button"
+            className="inline-flex items-center justify-center rounded p-2 hover:bg-gray-100 transition"
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            aria-label="Menu"
+            ref={floatingRefs.setReference}
+            {...getReferenceProps()}
+          >
+            <FiMoreHorizontal size={18} />
+          </button>
+          {menuOpen ? (
+            <div
+              ref={floatingRefs.setFloating}
+              style={floatingStyles}
+              {...getFloatingProps()}
+              className="z-20 mt-2 w-48 rounded border border-gray-200 bg-white shadow-lg overflow-hidden"
+            >
+              <button
+                type="button"
+                onClick={handleDownloadCsv}
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50"
+              >
+                <FiDownload />
+                Download CSV
+              </button>
+              <button
+                type="button"
+                onClick={handleDuplicate}
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50"
+              >
+                <FiCopy />
+                Duplicate
+              </button>
+            </div>
+          ) : null}
+        </div>
+      </div>
+      <div className="p-4 h-[calc(100vh-80px)] overflow-scroll max-w-full">
         <table>
           <thead>
             <tr className="border border-gray-200 divide-gray-200 divide-x">
