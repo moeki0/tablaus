@@ -47,10 +47,6 @@ export const timeFormats = [
   { pattern: "H:mm:ss", output: "H:mm:ss", matcher: /^\d{1,2}:\d{2}:\d{2}$/ },
   { pattern: "HH:mm", output: "HH:mm", matcher: /^\d{2}:\d{2}$/ },
   { pattern: "H:mm", output: "H:mm", matcher: /^\d{1,2}:\d{2}$/ },
-  { pattern: "HHmmss", output: "HHmmss", matcher: /^\d{6}$/ },
-  { pattern: "Hmmss", output: "Hmmss", matcher: /^\d{5}$/ },
-  { pattern: "HHmm", output: "HHmm", matcher: /^\d{4}$/ },
-  { pattern: "Hmm", output: "Hmm", matcher: /^\d{3}$/ },
 ] as const;
 
 export const dateTimeFormats = [
