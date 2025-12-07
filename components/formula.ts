@@ -130,6 +130,10 @@ const runExpression = async (
     rowValues: nextContext.rowValues,
     rowIndex: nextContext.rowIndex,
     columnIndex: nextContext.columnIndex,
+    asyncFilter: async (array: Array<unknown>, predicate: any) => {
+      const results = await Promise.all(array.map(predicate));
+      return array.filter((_, i) => results[i]);
+    },
     Math,
     count: (pattern?: string) => {
       const i = nextContext.columnIndex;
