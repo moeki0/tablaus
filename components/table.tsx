@@ -49,7 +49,6 @@ import {
   shift,
   useMergeRefs,
 } from "@floating-ui/react";
-import { useTableLookup } from "./useTableLookup";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 type ParsedFilter = {
@@ -134,7 +133,6 @@ export function Table({
   const currentRowRef = useRef<number | null>(null);
   const savedRef = useRef({ csv, querySpec: initialQuerySpec ?? "" });
   const menuRef = useRef<HTMLDivElement | null>(null);
-  const tableLookup = useTableLookup();
 
   const {
     refs: floatingRefs,
@@ -256,7 +254,6 @@ export function Table({
                 rowValues: rowsForEval[row.originalIndex],
                 rowIndex: row.originalIndex,
                 columnIndex,
-                tableLookup,
               };
               const res = reg.test(
                 String(resolveProperty(columns[columnIndex], ctx)) ?? ""
@@ -275,7 +272,6 @@ export function Table({
             rowValues: rowsForEval[row.originalIndex],
             rowIndex: row.originalIndex,
             columnIndex,
-            tableLookup,
           };
           const res =
             String(resolveProperty(columns[columnIndex], ctx)) === needle;
@@ -583,14 +579,12 @@ export function Table({
                 allRows={visibleBodyRows}
                 onStartEdit={startDraft}
                 onEndEdit={commitDraft}
-                tableLookup={tableLookup}
               />
             ))}
             <TableFooter
               columns={columns}
               footer={footer}
               bodyRows={visibleBodyRows}
-              tableLookup={tableLookup}
             />
           </tbody>
         </table>
