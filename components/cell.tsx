@@ -191,7 +191,8 @@ export function Cell({
       inputsRef.current[i]![j]!.classList.add(
         value?.match(/\[[x ]\]/) || value?.match(/^% /)
           ? "font-mono"
-          : "font-sans");
+          : "font-sans"
+      );
       autosizeInput(inputsRef.current[i]![j]);
     }
   }, [i, inputsRef, j, value]);
@@ -213,10 +214,10 @@ export function Cell({
               inputsRef.current[i][j] = el;
             }}
             className={`p-2 text-[16px] ${
-              !isEditing && "font-sans!"
+              !isEditing && !displayValue.match(/\[[x ]\]/) && "font-sans!"
             } outline-0 min-w-full ${
               !(!buttonAction || isEditing) && "hidden"
-            }`}
+            } ${displayValue.match(/\[(x|\s)\]/) ? "font-mono!" : ""}`}
             value={displayValue}
             onFocus={() => {
               onStartEdit?.();
