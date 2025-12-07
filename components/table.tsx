@@ -445,7 +445,7 @@ export function Table({
           ) : null}
         </div>
       </div>
-      <div className="p-4 h-[calc(100vh-80px)] overflow-scroll max-w-full">
+      <div className="p-4 h-[calc(100vh-50px)] overflow-scroll max-w-full">
         <table>
           <thead>
             <tr className="border border-gray-200 divide-gray-200 divide-x">
