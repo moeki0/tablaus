@@ -464,7 +464,7 @@ export function Table({
 
   return (
     <div className="">
-      <div className="flex flex-wrap items-center gap-2 p-2 md:px-4 border-b border-gray-200">
+      <div className="flex flex-wrap items-center gap-2 pt-2 md:px-4">
         {onOpenSidebar ? (
           <button
             type="button"
