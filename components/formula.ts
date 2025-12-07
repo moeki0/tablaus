@@ -10,6 +10,7 @@ import {
 } from "date-fns";
 import "ses";
 import { datetime } from "drizzle-orm/mysql-core";
+import { parseNumberLike } from "./number-format";
 
 type RowLike = { values: Record<string, string> };
 
@@ -131,9 +132,9 @@ const runExpression = (expression: string, context: EvalContext): unknown => {
                 rowIndex: index,
                 columnIndex: i,
               };
-              return Number(resolveProperty(context.columns[i], c));
+              return parseNumberLike(resolveProperty(context.columns[i], c));
             })
-            .filter((v) => !isNaN(v))
+            .filter((v): v is number => typeof v === "number")
         );
       } else {
         return 0;

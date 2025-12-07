@@ -61,6 +61,22 @@ describe("evaluateFormulaContent", () => {
     expect(result.value).toBe(6);
   });
 
+  it("通貨記号・カンマ付き数値もsumで加算できる", () => {
+    const rows = [
+      { values: { Price: "$4,000" } },
+      { values: { Price: "¥1,500" } },
+      { values: { Price: "￥ 500" } },
+    ];
+    const columns = ["Price"];
+    const result = evaluateFormulaContent("% sum()", {
+      rows,
+      columns,
+      rowIndex: 0,
+      columnIndex: 0,
+    });
+    expect(result.value).toBe(6000);
+  });
+
   it("buttonを返せる", () => {
     const result = evaluateFormulaContent(
       '% button("クリック", (row, col, rows) => { rows[row].values["Num"] = "2"; })',
