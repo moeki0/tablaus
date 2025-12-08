@@ -491,7 +491,7 @@ export function Table({
               setQuerySpec(e.target.value);
               setSuggestOpen(!e.target.value.trim() && suggestions.length > 0);
             }}
-            className="flex-1 text-gray-600 text-sm bg-transparent px-1 py-1 outline-0"
+            className="flex-1 text-gray-600 bg-transparent px-1 py-1 outline-0"
             aria-label="Query"
             ref={mergedQueryRef}
             {...getSuggestRefProps({
@@ -585,7 +585,7 @@ export function Table({
         </div>
       </div>
       <div className="bg-gray-50 flex justify-center items-center w-screen p-4 h-[calc(100vh-50px)] overflow-scroll max-w-full">
-        <div className="border border-gray-200 bg-gray-100 rounded-xl  max-h-full overflow-scroll shadow">
+        <div className="border border-gray-200 bg-gray-100 rounded  max-h-full overflow-scroll shadow">
           <table className="">
             <thead className="top-0 sticky bg-gray-100">
               <tr className="">
