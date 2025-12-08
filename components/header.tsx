@@ -51,7 +51,7 @@ export function Header({
   return (
     <th className="">
       <input
-        className="p-2 outline-0 min-w-full font-normal text-gray-600"
+        className="px-2 py-1 outline-0 min-w-full font-semibold text-gray-800 border-b border-r border-gray-200"
         ref={(el) => {
           colsRef.current[i] = el;
         }}

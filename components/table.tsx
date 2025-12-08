@@ -29,11 +29,11 @@ import { TableTitle } from "./TableTitle";
 import { emitTableUpdated } from "@/lib/tableUpdateEvent";
 import {
   FiFilter,
-  FiSidebar,
   FiMoreHorizontal,
   FiDownload,
   FiCopy,
   FiTrash2,
+  FiHome,
 } from "react-icons/fi";
 import { EvalContext, resolveProperty } from "./formula";
 import { useRouter } from "next/navigation";
@@ -51,6 +51,7 @@ import {
   useMergeRefs,
 } from "@floating-ui/react";
 import { format, formatRelative } from "date-fns";
+import Link from "next/link";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 type ParsedFilter = {
@@ -112,14 +113,12 @@ export function Table({
   initialCsv,
   initialName,
   initialQuerySpec,
-  onOpenSidebar,
   initialUpdatedAt,
 }: {
   tableId?: string;
   initialCsv?: string;
   initialName: string;
   initialQuerySpec?: string;
-  onOpenSidebar?: () => void;
   initialUpdatedAt: string;
 }) {
   const router = useRouter();
@@ -467,17 +466,11 @@ export function Table({
 
   return (
     <div className="h-screen overflow-hidden">
-      <div className="flex flex-wrap items-center gap-2 p-2 border-b border-gray-200 shadow md:px-4">
-        {onOpenSidebar ? (
-          <button
-            type="button"
-            onClick={onOpenSidebar}
-            className="md:hidden inline-flex items-center gap-2 rounded p-2 hover:bg-gray-100 transition"
-          >
-            <FiSidebar size={18} />
-          </button>
-        ) : null}
+      <div className="flex flex-wrap items-center gap-2 px-2 py-1 border-b border-gray-200 shadow">
         <div className="flex grow gap-4 items-center">
+          <Link href="/" className="cursor-default hover:bg-gray-100 p-2 rounded transition">
+            <FiHome />
+          </Link>
           <TableTitle id={tableId!} initialName={initialName} />
           {/* <div className="text-xs text-gray-400">
             {formatRelative(initialUpdatedAt, new Date())}
@@ -584,9 +577,9 @@ export function Table({
           ) : null}
         </div>
       </div>
-      <div className="bg-gray-50 flex justify-center items-center w-screen p-4 h-[calc(100vh-50px)] overflow-scroll max-w-full">
-        <div className="border border-gray-200 bg-gray-100 rounded  max-h-full overflow-scroll shadow">
-          <table className="">
+      <div className="bg-gray-50 flex w-screen h-[calc(100vh-40px)] overflow-scroll max-w-full">
+        <div className="w-screen bg-gray-50  h-full overflow-scroll">
+          <table className="border-b border-gray-200">
             <thead className="top-0 sticky bg-gray-100">
               <tr className="">
                 {columns.map((c, i) => (

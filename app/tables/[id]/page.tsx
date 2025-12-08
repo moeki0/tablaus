@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { ensureSchema } from "@/lib/ensureSchema";
 import { pool } from "@/lib/db";
 import { notFound, redirect } from "next/navigation";
-import { desc, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { TableWorkspace } from "@/components/TableWorkspace";
 
 export default async function TableDetailPage({
@@ -39,21 +39,9 @@ export default async function TableDetailPage({
     notFound();
   }
 
-  const tableList = await db
-    .select({
-      id: tables.id,
-      name: tables.name,
-      createdAt: tables.createdAt,
-    })
-    .from(tables)
-    .where(eq(tables.userId, session.user.email))
-    .orderBy(desc(tables.updatedAt), desc(tables.createdAt));
-
   return (
     <main>
       <TableWorkspace
-        tableList={tableList.map((t) => ({ id: t.id, name: t.name }))}
-        activeId={row.id}
         tableId={row.id}
         initialCsv={row.csv}
         initialName={row.name}
