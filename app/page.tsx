@@ -143,7 +143,7 @@ export default async function HomePage() {
                     <td className="text-gray-600">
                       <Link
                         href={`/tables/${table.id}`}
-                        className="px-2 py-1 block truncate"
+                        className="px-2 py-1 block truncate text-sm"
                       >
                         {formatRelative(table.createdAt, new Date())}
                       </Link>
@@ -151,7 +151,7 @@ export default async function HomePage() {
                     <td className=" text-gray-600">
                       <Link
                         href={`/tables/${table.id}`}
-                        className="px-2 py-1 block truncate"
+                        className="px-2 py-1 block truncate text-sm"
                       >
                         {formatRelative(table.updatedAt, new Date())}
                       </Link>
