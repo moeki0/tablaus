@@ -208,6 +208,7 @@ export function Cell({
     <>
       <td
         ref={refs.setReference}
+        className="border-r border-gray-200"
         onClick={() => {
           setIsEditing(true);
         }}
@@ -220,7 +221,7 @@ export function Cell({
               }
               inputsRef.current[i][j] = el;
             }}
-            className={`px-2 py-1 border-r border-gray-200 ${
+            className={`px-2 py-1 ${
               value !== displayValue && isEditing ? "font-mono" : ""
             } ${!isEditing && "font-sans!"} outline-0 min-w-full ${
               !(!buttonAction || isEditing) && "hidden"
@@ -444,7 +445,7 @@ export function Cell({
               <div className=" text-white text-xs rounded overflow-hidden flex">
                 {allValues.map((r, k) => (
                   <button
-                    className={`px-3 cursor-pointer hover:bg-gray-700 z-50 py-1 ${
+                    className={`px-3 cursor-pointer hover:bg-gray-700 z-50 py-0.5 ${
                       com === k ? "bg-gray-700 underline" : "bg-gray-900"
                     }`}
                     key={`c-${k}`}
