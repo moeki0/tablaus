@@ -93,7 +93,7 @@ export default async function HomePage() {
                   (label) => (
                     <th
                       key={label}
-                      className="text-left text-sm font-semibold text-gray-800"
+                      className="text-left font-semibold text-gray-800"
                     >
                       <p className="px-2 py-1 border-b border-gray-200">{label}</p>
                     </th>
