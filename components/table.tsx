@@ -585,7 +585,7 @@ export function Table({
         </div>
       </div>
       <div className="bg-gray-50 flex justify-center items-center w-screen p-4 h-[calc(100vh-50px)] overflow-scroll max-w-full">
-        <div className="border border-gray-200 bg-gray-100 rounded-xl bg-white max-h-full overflow-scroll shadow">
+        <div className="border border-gray-200 bg-gray-100 rounded-xl  max-h-full overflow-scroll shadow">
           <table className="">
             <thead className="top-0 sticky bg-gray-100">
               <tr className="">
@@ -602,7 +602,7 @@ export function Table({
                 ))}
               </tr>
             </thead>
-            <tbody>
+            <tbody className="bg-white">
               {visibleRows.map(({ row, originalIndex }, i) => (
                 <Row
                   key={`row-${i}`}
