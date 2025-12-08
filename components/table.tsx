@@ -467,7 +467,7 @@ export function Table({
   return (
     <div className="h-screen overflow-hidden">
       <div className="flex flex-wrap items-center gap-2 px-2 py-1 border-b border-gray-200 shadow">
-        <div className="flex grow gap-4 items-center">
+        <div className="flex grow gap-2 items-center">
           <Link href="/" className="hover:bg-gray-100 p-2 rounded transition">
             <FiHome />
           </Link>
