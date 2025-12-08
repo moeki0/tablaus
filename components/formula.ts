@@ -125,7 +125,10 @@ const runExpression = (expression: string, context: EvalContext): unknown => {
         return 0;
       }
     },
-    sum: () => {
+    sum: (a: Array<unknown>) => {
+      if (a) {
+        return _.sum(a)
+      }
       const i = nextContext.columnIndex;
       if (i !== undefined && nextContext.rowIndex === -1) {
         return _.sum(
