@@ -475,7 +475,7 @@ export function Table({
           </button>
         ) : null}
         <TableTitle id={tableId!} initialName={initialName} />
-        <div className="flex items-center gap-2 bg-gray-50 pl-2 rounded border border-gray-200 flex-1 max-w-[250px]">
+        <div className="flex items-center gap-2 bg-gray-50 pl-4 rounded-full border border-gray-200 flex-1 max-w-[250px]">
           <FiFilter className="stroke-gray-500" size={14} />
           <input
             value={querySpec}
@@ -483,7 +483,7 @@ export function Table({
               setQuerySpec(e.target.value);
               setSuggestOpen(!e.target.value.trim() && suggestions.length > 0);
             }}
-            className="flex-1 bg-transparent px-1 py-1 outline-0"
+            className="flex-1 text-gray-600 font-mono bg-transparent px-1 py-1 outline-0"
             aria-label="Query"
             ref={mergedQueryRef}
             {...getSuggestRefProps({
