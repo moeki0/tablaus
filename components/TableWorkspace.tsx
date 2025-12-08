@@ -91,13 +91,13 @@ export function TableWorkspace({
             maxSize={40}
             className="min-w-[200px] max-w-[300px]"
           >
-            <div className="h-full border-gray-200 bg-gray-50">
+            <div className="h-full border-gray-200 bg-white">
               <div className="flex h-full flex-col overflow-hidden">
                 <TableSidebar tables={tableList} activeId={activeId} />
               </div>
             </div>
           </Panel>
-          <PanelResizeHandle className="w-1 border-gray-200 border-r bg-gray-50 hover:opacity-100 transition focus-visible:outline-blue-500 cursor-col-resize" />
+          <PanelResizeHandle className="w-1 border-gray-200 border-r bg-white hover:opacity-100 transition focus-visible:outline-blue-500 cursor-col-resize" />
           <Panel>
             <div className="h-screen overflow-auto">
               <Table

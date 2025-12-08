@@ -84,13 +84,13 @@ export function TableSidebar({
           type="button"
           onClick={handleCreate}
           disabled={creating}
-          className="inline-flex items-center justify-center cursor-default rounded-xl hover:bg-gray-100 bg-white border border-gray-300 shadow p-1.5 transition disabled:opacity-60"
+          className="inline-flex items-center justify-center cursor-default rounded-xl hover:bg-gray-100 border border-gray-300 shadow p-1.5 transition bg-gray-50 disabled:opacity-60"
           aria-label="Create table"
         >
           <FiEdit size={18} className="stroke-gray-600" />
         </button>
       </div>
-      <div className="flex-1 overflow-y-auto">
+      <div className="h-[calc(100vh-55px)] overflow-y-scroll">
         {list.length === 0 ? (
           <div className="p-2 md:p-4 pt-0! text-sm text-gray-500"></div>
         ) : (
