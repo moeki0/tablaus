@@ -90,7 +90,7 @@ export default async function HomePage() {
           <table className="min-w-full">
             <thead className="sticky top-0 bg-gray-100 border-b border-gray-200">
               <tr>
-                {["Title", "Row", "Column", "Created At", "Updated At"].map(
+                {["Title", "Rows", "Columns", "Created At", "Updated At"].map(
                   (label) => (
                     <th
                       key={label}
