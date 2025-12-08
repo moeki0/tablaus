@@ -35,7 +35,6 @@ export default async function HomePage() {
           <h1 className="text-2xl font-bold">Tables</h1>
           <SignInOutButton />
         </header>
-        <p>テーブルにアクセスするにはログインしてください。</p>
       </main>
     );
   }
@@ -72,7 +71,7 @@ export default async function HomePage() {
     <main className="h-screen overflow-hidden">
       <div className="flex flex-wrap items-center gap-3 px-2 py-1 border-b border-gray-200 shadow bg-white">
         <div className="flex items-center gap-3">
-          <h1 className="font-bold">TiddyTable</h1>
+          <h1 className="font-bold">Tablaus</h1>
         </div>
         <div className="flex items-center gap-2 ml-auto">
           <Link
