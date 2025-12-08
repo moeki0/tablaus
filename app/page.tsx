@@ -6,7 +6,7 @@ import { auth } from "@/lib/auth";
 import { db, pool } from "@/lib/db";
 import { ensureSchema } from "@/lib/ensureSchema";
 import { desc, eq } from "drizzle-orm";
-import { format } from "date-fns";
+import { format, formatRelative } from "date-fns";
 import { FiEdit } from "react-icons/fi";
 
 type TableListItem = {
@@ -86,7 +86,7 @@ export default async function HomePage() {
 
       <div className="bg-gray-50 flex w-screen h-[calc(100vh-40px)] overflow-scroll max-w-full">
         <div className="w-screen bg-gray-50 rounded h-full overflow-scroll">
-          <table className="min-w-full">
+          <table className="min-w-full border-x border-gray-200">
             <thead className="sticky top-0 bg-gray-100 border-b border-gray-200">
               <tr>
                 {["Title", "Rows", "Columns", "Created At", "Updated At"].map(
@@ -95,7 +95,9 @@ export default async function HomePage() {
                       key={label}
                       className="text-left font-semibold text-gray-800"
                     >
-                      <p className="px-2 py-1 border-b border-gray-200">{label}</p>
+                      <p className="px-2 py-1 border-b border-gray-200">
+                        {label}
+                      </p>
                     </th>
                   )
                 )}
@@ -143,7 +145,7 @@ export default async function HomePage() {
                         href={`/tables/${table.id}`}
                         className="px-2 py-1 block truncate"
                       >
-                        {formatDate(table.createdAt)}
+                        {formatRelative(table.createdAt, new Date())}
                       </Link>
                     </td>
                     <td className=" text-gray-600">
@@ -151,7 +153,7 @@ export default async function HomePage() {
                         href={`/tables/${table.id}`}
                         className="px-2 py-1 block truncate"
                       >
-                        {formatDate(table.updatedAt)}
+                        {formatRelative(table.updatedAt, new Date())}
                       </Link>
                     </td>
                   </tr>
