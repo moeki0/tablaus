@@ -93,9 +93,9 @@ export default async function HomePage() {
                   (label) => (
                     <th
                       key={label}
-                      className="px-2 py-1 text-left text-sm font-semibold text-gray-600"
+                      className="text-left text-sm font-semibold text-gray-800"
                     >
-                      {label}
+                      <p className="px-2 py-1 border-b border-gray-200">{label}</p>
                     </th>
                   )
                 )}
@@ -158,15 +158,25 @@ export default async function HomePage() {
                 ))
               )}
             </tbody>
-            <tfoot className="sticky border-b bottom-0 bg-gray-100 border-t border-gray-200">
+            <tfoot className="sticky border-b bottom-0 bg-gray-100">
               <tr>
-                <td className="px-2 py-1 font-semibold text-gray-700">
-                  Count: {tableList.length}
+                <td className=" font-semibold text-gray-700">
+                  <p className="px-2 py-1 border-t border-gray-200">
+                    Count: {tableList.length}
+                  </p>
                 </td>
-                <td className="px-2 py-1" />
-                <td className="px-2 py-1" />
-                <td className="px-2 py-1" />
-                <td className="px-2 py-1" />
+                <td>
+                  <p className="px-2 py-1 border-t border-gray-200 absolute top-0 left-0 right-0 bottom-0"></p>
+                </td>
+                <td>
+                  <p className="px-2 py-1 border-t border-gray-200 absolute top-0 left-0 right-0 bottom-0"></p>
+                </td>
+                <td>
+                  <p className="px-2 py-1 border-t border-gray-200 absolute top-0 left-0 right-0 bottom-0"></p>
+                </td>
+                <td>
+                  <p className="px-2 py-1 border-t border-gray-200 absolute top-0 left-0 right-0 bottom-0"></p>
+                </td>
               </tr>
             </tfoot>
           </table>
