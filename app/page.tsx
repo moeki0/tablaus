@@ -86,7 +86,7 @@ export default async function HomePage() {
       </div>
 
       <div className="bg-gray-50 flex w-screen h-[calc(100vh-40px)] overflow-scroll max-w-full">
-        <div className="w-screen bg-gray-100 rounded h-full overflow-scroll">
+        <div className="w-screen bg-gray-50 rounded h-full overflow-scroll">
           <table className="min-w-full">
             <thead className="sticky top-0 bg-gray-100 border-b border-gray-200">
               <tr>
