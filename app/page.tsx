@@ -8,6 +8,7 @@ import { ensureSchema } from "@/lib/ensureSchema";
 import { desc, eq } from "drizzle-orm";
 import { format, formatRelative } from "date-fns";
 import { FiEdit } from "react-icons/fi";
+import Image from "next/image";
 
 type TableListItem = {
   id: string;
@@ -71,7 +72,9 @@ export default async function HomePage() {
     <main className="h-screen overflow-hidden">
       <div className="flex flex-wrap items-center gap-3 px-2 py-1 border-b border-gray-200 shadow bg-white">
         <div className="flex items-center gap-3">
-          <h1 className="font-bold">Tablaus</h1>
+          <Link href="/" className="hover:opacity-90 rounded transition">
+            <Image alt="Tablaus" src="/tablaus.png" width={20} height={20} />
+          </Link>
         </div>
         <div className="flex items-center gap-2 ml-auto">
           <Link

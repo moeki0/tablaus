@@ -52,6 +52,7 @@ import {
 } from "@floating-ui/react";
 import { format, formatRelative } from "date-fns";
 import Link from "next/link";
+import Image from "next/image";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 type ParsedFilter = {
@@ -466,10 +467,10 @@ export function Table({
 
   return (
     <div className="h-screen overflow-hidden">
-      <div className="flex flex-wrap items-center gap-2 px-2 py-1 border-b border-gray-200 shadow">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 px-2 py-1 border-b border-gray-200 shadow">
         <div className="flex grow gap-2 items-center">
-          <Link href="/" className="hover:bg-gray-100 p-2 rounded transition">
-            <FiHome />
+          <Link href="/" className="hover:opacity-90 rounded transition">
+            <Image alt="Tablaus" src="/tablaus.png" width={20} height={20} />
           </Link>
           <TableTitle id={tableId!} initialName={initialName} />
           {/* <div className="text-xs text-gray-400">
