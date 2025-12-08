@@ -89,7 +89,7 @@ export function TableWorkspace({
             defaultSize={22}
             minSize={16}
             maxSize={40}
-            className="min-w-[200px]"
+            className="min-w-[200px] max-w-[300px]"
           >
             <div className="h-full border-gray-200 bg-gray-50">
               <div className="flex h-full flex-col overflow-hidden">
