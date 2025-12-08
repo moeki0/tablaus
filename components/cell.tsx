@@ -220,7 +220,7 @@ export function Cell({
               }
               inputsRef.current[i][j] = el;
             }}
-            className={`p-2 text-[14px] ${
+            className={`p-2 ${
               value !== displayValue && isEditing ? "font-mono" : ""
             } ${!isEditing && "font-sans!"} outline-0 min-w-full ${
               !(!buttonAction || isEditing) && "hidden"
