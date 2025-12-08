@@ -158,7 +158,7 @@ export default async function HomePage() {
                 ))
               )}
             </tbody>
-            <tfoot className="sticky border-b bottom-0 bg-gray-100">
+            <tfoot className="sticky border-b border-gray-200 bottom-0 bg-gray-100">
               <tr>
                 <td className=" font-semibold text-gray-700">
                   <p className="px-2 py-1 border-t border-gray-200">
