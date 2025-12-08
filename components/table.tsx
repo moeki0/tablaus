@@ -466,7 +466,7 @@ export function Table({
   }, [redo, undo]);
 
   return (
-    <div className="">
+    <div className="h-screen overflow-hidden">
       <div className="flex flex-wrap items-center gap-2 p-2 border-b border-gray-200 shadow md:px-4">
         {onOpenSidebar ? (
           <button
