@@ -107,6 +107,7 @@ export function TableWorkspace({
                 initialName={initialName}
                 initialQuerySpec={initialQuerySpec}
                 initialUpdatedAt={initialUpdatedAt}
+                onOpenSidebar={() => setSidebarOpen(true)}
               />
               <RecentTableTracker tableId={tableId} />
             </div>

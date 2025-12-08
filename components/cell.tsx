@@ -220,11 +220,11 @@ export function Cell({
               }
               inputsRef.current[i][j] = el;
             }}
-            className={`p-2 text-[16px] ${
-              !isEditing && !displayValue?.match(/\[[x ]\]/) && "font-sans!"
-            } outline-0 min-w-full ${
+            className={`p-2 text-[14px] ${
+              value !== displayValue && isEditing ? "font-mono" : ""
+            } ${!isEditing && "font-sans!"} outline-0 min-w-full ${
               !(!buttonAction || isEditing) && "hidden"
-            } ${displayValue?.match(/\[(x|\s)\]/) ? "font-mono!" : ""}`}
+            }`}
             value={isEditing ? value : displayValue || ""}
             onFocus={() => {
               onStartEdit?.();

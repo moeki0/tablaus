@@ -467,7 +467,7 @@ export function Table({
 
   return (
     <div className="">
-      <div className="flex flex-wrap items-center gap-2 pt-2 md:px-4">
+      <div className="flex flex-wrap items-center gap-2 p-2 border-b border-gray-200 shadow md:px-4">
         {onOpenSidebar ? (
           <button
             type="button"
@@ -479,9 +479,9 @@ export function Table({
         ) : null}
         <div className="flex grow gap-4 items-center">
           <TableTitle id={tableId!} initialName={initialName} />
-          <div className="text-xs text-gray-400">
+          {/* <div className="text-xs text-gray-400">
             {formatRelative(initialUpdatedAt, new Date())}
-          </div>
+          </div> */}
         </div>
         <div className="flex items-center gap-2 bg-gray-50 pl-4 rounded-full border border-gray-200 flex-1 max-w-[250px]">
           <FiFilter className="stroke-gray-500" size={14} />
@@ -584,47 +584,49 @@ export function Table({
           ) : null}
         </div>
       </div>
-      <div className="p-4 h-[calc(100vh-50px)] overflow-scroll max-w-full">
-        <table>
-          <thead>
-            <tr className="">
-              {columns.map((c, i) => (
-                <Header
-                  colsRef={colsRef}
+      <div className="bg-gray-50 flex justify-center items-center w-screen p-4 h-[calc(100vh-50px)] overflow-scroll max-w-full">
+        <div className="border border-gray-200 rounded-xl bg-white max-h-full overflow-scroll shadow">
+          <table className="">
+            <thead className="top-0 sticky bg-gray-200">
+              <tr className="">
+                {columns.map((c, i) => (
+                  <Header
+                    colsRef={colsRef}
+                    i={i}
+                    c={c}
+                    key={`c-${i}`}
+                    currentRowRef={currentRowRef}
+                    columns={columns}
+                    currentColRef={currentColRef}
+                  />
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {visibleRows.map(({ row, originalIndex }, i) => (
+                <Row
+                  key={`row-${i}`}
+                  row={row}
+                  rowValues={bodyRowObjects[i]}
                   i={i}
-                  c={c}
-                  key={`c-${i}`}
+                  rowIndex={originalIndex}
+                  inputsRef={inputsRef}
                   currentRowRef={currentRowRef}
+                  colsRef={colsRef}
                   columns={columns}
-                  currentColRef={currentColRef}
+                  allRows={visibleBodyRows}
+                  onStartEdit={startDraft}
+                  onEndEdit={commitDraft}
                 />
               ))}
-            </tr>
-          </thead>
-          <tbody>
-            {visibleRows.map(({ row, originalIndex }, i) => (
-              <Row
-                key={`row-${i}`}
-                row={row}
-                rowValues={bodyRowObjects[i]}
-                i={i}
-                rowIndex={originalIndex}
-                inputsRef={inputsRef}
-                currentRowRef={currentRowRef}
-                colsRef={colsRef}
+              <TableFooter
                 columns={columns}
-                allRows={visibleBodyRows}
-                onStartEdit={startDraft}
-                onEndEdit={commitDraft}
+                footer={footer}
+                bodyRows={visibleBodyRows}
               />
-            ))}
-            <TableFooter
-              columns={columns}
-              footer={footer}
-              bodyRows={visibleBodyRows}
-            />
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

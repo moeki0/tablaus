@@ -72,7 +72,7 @@ export function FooterCell({
           setEditing(true);
           startDraft();
         }}
-        className={`p-2  ${
+        className={`p-2 text-[14px] ${
           editing ? "font-mono bg-white" : "bg-gray-100"
         } outline-0 min-w-full min-h-9`}
         value={editing ? value : result}
