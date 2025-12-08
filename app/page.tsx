@@ -159,15 +159,15 @@ export default async function HomePage() {
                 ))
               )}
             </tbody>
-            <tfoot className="sticky bottom-0 bg-gray-100 border-t border-gray-200">
+            <tfoot className="sticky border-b bottom-0 bg-gray-100 border-t border-gray-200">
               <tr>
                 <td className="px-2 py-1 font-semibold text-gray-700">
                   合計: {tableList.length}
                 </td>
-                <td className="p-3" />
-                <td className="p-3" />
-                <td className="p-3" />
-                <td className="p-3" />
+                <td className="px-2 py-1" />
+                <td className="px-2 py-1" />
+                <td className="px-2 py-1" />
+                <td className="px-2 py-1" />
               </tr>
             </tfoot>
           </table>
