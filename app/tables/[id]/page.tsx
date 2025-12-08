@@ -57,6 +57,7 @@ export default async function TableDetailPage({
         tableId={row.id}
         initialCsv={row.csv}
         initialName={row.name}
+        initialUpdatedAt={row.updatedAt}
         initialQuerySpec={row.querySpec ?? ""}
       />
     </main>

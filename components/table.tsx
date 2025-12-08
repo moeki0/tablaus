@@ -50,6 +50,7 @@ import {
   shift,
   useMergeRefs,
 } from "@floating-ui/react";
+import { format, formatRelative } from "date-fns";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 type ParsedFilter = {
@@ -112,12 +113,14 @@ export function Table({
   initialName,
   initialQuerySpec,
   onOpenSidebar,
+  initialUpdatedAt,
 }: {
   tableId?: string;
   initialCsv?: string;
   initialName: string;
   initialQuerySpec?: string;
   onOpenSidebar?: () => void;
+  initialUpdatedAt: string;
 }) {
   const router = useRouter();
   const csv = useAtomValue(tableAtom);
@@ -474,7 +477,12 @@ export function Table({
             <FiSidebar size={18} />
           </button>
         ) : null}
-        <TableTitle id={tableId!} initialName={initialName} />
+        <div className="flex grow gap-4 items-center">
+          <TableTitle id={tableId!} initialName={initialName} />
+          <div className="text-xs text-gray-400">
+            {formatRelative(initialUpdatedAt, new Date())}
+          </div>
+        </div>
         <div className="flex items-center gap-2 bg-gray-50 pl-4 rounded-full border border-gray-200 flex-1 max-w-[250px]">
           <FiFilter className="stroke-gray-500" size={14} />
           <input
@@ -483,7 +491,7 @@ export function Table({
               setQuerySpec(e.target.value);
               setSuggestOpen(!e.target.value.trim() && suggestions.length > 0);
             }}
-            className="flex-1 text-gray-600 font-mono bg-transparent px-1 py-1 outline-0"
+            className="flex-1 text-gray-600 text-sm bg-transparent px-1 py-1 outline-0"
             aria-label="Query"
             ref={mergedQueryRef}
             {...getSuggestRefProps({
@@ -579,7 +587,7 @@ export function Table({
       <div className="p-4 h-[calc(100vh-50px)] overflow-scroll max-w-full">
         <table>
           <thead>
-            <tr className="border border-gray-300 divide-gray-300 divide-x bg-gray-200">
+            <tr className="">
               {columns.map((c, i) => (
                 <Header
                   colsRef={colsRef}

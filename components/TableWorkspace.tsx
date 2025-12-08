@@ -15,6 +15,7 @@ export function TableWorkspace({
   initialCsv,
   initialName,
   initialQuerySpec,
+  initialUpdatedAt,
 }: {
   tableList: TableSummary[];
   activeId: string;
@@ -22,6 +23,7 @@ export function TableWorkspace({
   initialCsv: string;
   initialName: string;
   initialQuerySpec: string;
+  initialUpdatedAt: string;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -74,6 +76,7 @@ export function TableWorkspace({
             initialCsv={initialCsv}
             initialName={initialName}
             initialQuerySpec={initialQuerySpec}
+            initialUpdatedAt={initialUpdatedAt}
             onOpenSidebar={() => setSidebarOpen(true)}
           />
           <RecentTableTracker tableId={tableId} />
@@ -103,6 +106,7 @@ export function TableWorkspace({
                 initialCsv={initialCsv}
                 initialName={initialName}
                 initialQuerySpec={initialQuerySpec}
+                initialUpdatedAt={initialUpdatedAt}
               />
               <RecentTableTracker tableId={tableId} />
             </div>
