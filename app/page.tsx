@@ -69,7 +69,7 @@ export default async function HomePage() {
   });
 
   return (
-    <main className="h-screen overflow-hidden">
+    <main className="">
       <div className="flex flex-wrap items-center gap-3 px-2 py-1 border-b border-gray-200 shadow bg-white">
         <div className="flex items-center gap-3">
           <Link href="/" className="hover:opacity-90 rounded transition">

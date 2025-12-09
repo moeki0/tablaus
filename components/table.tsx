@@ -474,8 +474,8 @@ export function Table({
   }, [redo, undo]);
 
   return (
-    <div className="h-screen overflow-hidden">
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 px-2 py-1 border-b border-gray-200">
+    <div className="">
+      <div className="flex bg-white z-10 sticky top-0 flex-wrap items-center gap-x-2 gap-y-0.5 px-2 py-1 border-b border-gray-200">
         <div className="flex grow gap-2 items-center">
           <Link href="/" className="hover:opacity-90 rounded transition">
             <Image alt="Tablaus" src="/tablaus.png" width={20} height={20} />
@@ -491,7 +491,7 @@ export function Table({
           <SignInOutButton />
         </div>
       </div>
-      <div className="flex animate-fade items-start w-screen justify-center h-[calc(100vh-40px)]">
+      <div className="flex animate-fade items-start w-screen justify-center">
         <div className="mx-auto min-w-[300px] sm:min-w-[600px] bg-white p-4 md:p-10">
           <div className="flex justify-between items-center gap-3">
             <TableTitle id={tableId!} initialName={initialName} />

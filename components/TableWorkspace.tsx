@@ -17,7 +17,7 @@ export function TableWorkspace({
   initialUpdatedAt: string;
 }) {
   return (
-    <div className="h-screen overflow-hidden">
+    <div className="">
       <Table
         key={tableId}
         tableId={tableId}
