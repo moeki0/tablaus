@@ -34,6 +34,7 @@ import {
   FiCopy,
   FiTrash2,
   FiHome,
+  FiEdit,
 } from "react-icons/fi";
 import { EvalContext, resolveProperty } from "./formula";
 import { useRouter } from "next/navigation";
@@ -53,6 +54,7 @@ import {
 import { format, formatRelative } from "date-fns";
 import Link from "next/link";
 import Image from "next/image";
+import { SignInOutButton } from "./auth/SignInOutButton";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 type ParsedFilter = {
@@ -473,161 +475,180 @@ export function Table({
 
   return (
     <div className="h-screen overflow-hidden">
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 px-2 py-1 border-b border-gray-200 shadow">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 px-2 py-1 border-b border-gray-200">
         <div className="flex grow gap-2 items-center">
           <Link href="/" className="hover:opacity-90 rounded transition">
             <Image alt="Tablaus" src="/tablaus.png" width={20} height={20} />
           </Link>
-          <TableTitle id={tableId!} initialName={initialName} />
-          {/* <div className="text-xs text-gray-400">
-            {formatRelative(initialUpdatedAt, new Date())}
-          </div> */}
         </div>
-        <div className="flex items-center gap-2 bg-gray-50 pl-4 rounded-full border border-gray-200 flex-1 max-w-[250px]">
-          <FiFilter className="stroke-gray-500" size={14} />
-          <input
-            value={querySpec}
-            onChange={(e) => {
-              setQuerySpec(e.target.value);
-              setSuggestOpen(!e.target.value.trim() && suggestions.length > 0);
-            }}
-            className="flex-1 text-gray-600 bg-transparent px-1 py-1 outline-0"
-            aria-label="Query"
-            ref={mergedQueryRef}
-            {...getSuggestRefProps({
-              onFocus: () => {
-                if (!querySpec.trim() && suggestions.length > 0) {
-                  setSuggestOpen(true);
-                }
-              },
-            })}
-          />
-        </div>
-        {suggestOpen && suggestions.length ? (
-          <div
-            ref={suggestRefs.setFloating}
-            style={suggestStyles}
-            {...getSuggestFloatingProps()}
-            className="z-30 mt-1 w-80 rounded border border-gray-200 bg-white shadow-lg overflow-hidden"
+        <div className="flex items-center gap-2 ml-auto">
+          <Link
+            href="/tables/new"
+            className="inline-flex items-center gap-2 rounded bg-gray-900 px-4 py-1 text-white shadow hover:bg-gray-800 transition"
           >
-            {suggestions.map((s, idx) => (
-              <button
-                key={s.query}
-                ref={(node) => {
-                  suggestListRef.current[idx] = node;
-                }}
-                {...getItemProps({
-                  onClick: () => {
-                    setQuerySpec(s.query);
-                    setSuggestOpen(false);
-                    setTimeout(() => {
-                      queryInputRef.current?.focus();
-                    });
-                  },
-                  onMouseEnter: () => setActiveIndex(idx),
-                  onMouseLeave: () => setActiveIndex(null),
-                })}
-                className={`flex w-full items-center justify-between px-3 py-2 text-sm text-left hover:bg-gray-50 ${
-                  activeIndex === idx ? "bg-gray-50" : ""
-                }`}
-              >
-                <span className="truncate">{s.query}</span>
-                <span className="text-gray-400 text-xs">{s.description}</span>
-              </button>
-            ))}
-          </div>
-        ) : null}
-        <div className="relative" ref={menuRef}>
-          <button
-            type="button"
-            className="inline-flex items-center justify-center rounded p-2 hover:bg-gray-100 transition"
-            aria-haspopup="menu"
-            aria-expanded={menuOpen}
-            aria-label="Menu"
-            ref={floatingRefs.setReference}
-            {...getReferenceProps()}
-          >
-            <FiMoreHorizontal size={18} />
-          </button>
-          {menuOpen ? (
-            <div
-              ref={floatingRefs.setFloating}
-              style={floatingStyles}
-              {...getFloatingProps()}
-              className="z-20 mt-2 w-48 rounded border border-gray-200 bg-white shadow-lg overflow-hidden"
-            >
-              <button
-                type="button"
-                onClick={handleDownloadCsv}
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50"
-              >
-                <FiDownload />
-                Download CSV
-              </button>
-              <button
-                type="button"
-                onClick={handleDuplicate}
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50"
-              >
-                <FiCopy />
-                Duplicate
-              </button>
-              <button
-                type="button"
-                onClick={handleDelete}
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 text-red-600"
-              >
-                <FiTrash2 />
-                Delete
-              </button>
-            </div>
-          ) : null}
+            New <FiEdit />
+          </Link>
+          <SignInOutButton />
         </div>
       </div>
-      <div className="bg-gray-50 flex w-screen h-[calc(100vh-40px)] overflow-scroll max-w-full">
-        <div className="w-screen bg-gray-50  h-full overflow-scroll">
-          <table key={tableId} className="border-b border-gray-200">
-            <thead className="top-0 sticky bg-gray-100">
-              <tr className="">
-                {columns.map((c, i) => (
-                  <Header
-                    colsRef={colsRef}
-                    i={i}
-                    c={c}
-                    key={`c-${i}`}
-                    currentRowRef={currentRowRef}
-                    columns={columns}
-                    currentColRef={currentColRef}
-                  />
+      <div className="flex items-start w-screen justify-center h-[calc(100vh-40px)]">
+        <div className="mx-auto min-w-[400px] bg-white p-2 sm:p-4 md:p-10">
+          <div className="flex items-center gap-3">
+            <TableTitle id={tableId!} initialName={initialName} />
+            {suggestOpen && suggestions.length ? (
+              <div
+                ref={suggestRefs.setFloating}
+                style={suggestStyles}
+                {...getSuggestFloatingProps()}
+                className="z-30 mt-1 w-80 rounded border border-gray-200 bg-white shadow-lg overflow-hidden"
+              >
+                {suggestions.map((s, idx) => (
+                  <button
+                    key={s.query}
+                    ref={(node) => {
+                      suggestListRef.current[idx] = node;
+                    }}
+                    {...getItemProps({
+                      onClick: () => {
+                        setQuerySpec(s.query);
+                        setSuggestOpen(false);
+                        setTimeout(() => {
+                          queryInputRef.current?.focus();
+                        });
+                      },
+                      onMouseEnter: () => setActiveIndex(idx),
+                      onMouseLeave: () => setActiveIndex(null),
+                    })}
+                    className={`flex w-full items-center justify-between px-3 py-2 text-sm text-left hover:bg-gray-50 ${
+                      activeIndex === idx ? "bg-gray-50" : ""
+                    }`}
+                  >
+                    <span className="truncate">{s.query}</span>
+                    <span className="text-gray-400 text-xs">
+                      {s.description}
+                    </span>
+                  </button>
                 ))}
-              </tr>
-            </thead>
-            <tbody className="bg-white" key={tableId}>
-              {visibleRows
-                .filter((r) => r.row[0])
-                .map(({ row, originalIndex }, i) => (
-                  <Row
-                    key={row[0]}
-                    row={row}
-                    rowValues={bodyRowObjects[i]}
-                    i={i}
-                    rowIndex={originalIndex}
-                    inputsRef={inputsRef}
-                    currentRowRef={currentRowRef}
-                    colsRef={colsRef}
-                    columns={columns}
-                    allRows={visibleBodyRows}
-                    onStartEdit={startDraft}
-                    onEndEdit={commitDraft}
-                  />
-                ))}
-              <TableFooter
-                columns={columns}
-                footer={footer}
-                bodyRows={visibleBodyRows}
+              </div>
+            ) : null}
+            <div className="relative" ref={menuRef}>
+              <button
+                type="button"
+                className="inline-flex items-center justify-center rounded p-2 hover:bg-gray-100 transition"
+                aria-haspopup="menu"
+                aria-expanded={menuOpen}
+                aria-label="Menu"
+                ref={floatingRefs.setReference}
+                {...getReferenceProps()}
+              >
+                <FiMoreHorizontal size={18} />
+              </button>
+              {menuOpen ? (
+                <div
+                  ref={floatingRefs.setFloating}
+                  style={floatingStyles}
+                  {...getFloatingProps()}
+                  className="z-20 mt-2 w-48 rounded border border-gray-200 bg-white shadow-lg overflow-hidden"
+                >
+                  <button
+                    type="button"
+                    onClick={handleDownloadCsv}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50"
+                  >
+                    <FiDownload />
+                    Download CSV
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDuplicate}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50"
+                  >
+                    <FiCopy />
+                    Duplicate
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDelete}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 text-red-600"
+                  >
+                    <FiTrash2 />
+                    Delete
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          </div>
+          <div className="w-auto max-w-none flex flex-col">
+            <div className="flex flex-1 items-center gap-2 bg-white pl-2 border-t border-l w-full border-r border-gray-200">
+              <FiFilter className="stroke-gray-500" size={14} />
+              <input
+                value={querySpec}
+                onChange={(e) => {
+                  setQuerySpec(e.target.value);
+                  setSuggestOpen(
+                    !e.target.value.trim() && suggestions.length > 0
+                  );
+                }}
+                className="flex-1 w-full text-gray-600 bg-transparent px-1 py-1 outline-0"
+                aria-label="Query"
+                ref={mergedQueryRef}
+                {...getSuggestRefProps({
+                  onFocus: () => {
+                    if (!querySpec.trim() && suggestions.length > 0) {
+                      setSuggestOpen(true);
+                    }
+                  },
+                })}
               />
-            </tbody>
-          </table>
+            </div>
+            <div className="overflow-scroll w-full">
+              <table
+                key={tableId}
+                className="border-l border-t border-b border-gray-200 min-w-[400px]"
+              >
+                <thead className="top-0 sticky bg-gray-100">
+                  <tr className="">
+                    {columns.map((c, i) => (
+                      <Header
+                        colsRef={colsRef}
+                        i={i}
+                        c={c}
+                        key={`c-${i}`}
+                        currentRowRef={currentRowRef}
+                        columns={columns}
+                        currentColRef={currentColRef}
+                      />
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="bg-white" key={tableId}>
+                  {visibleRows
+                    .filter((r) => r.row[0])
+                    .map(({ row, originalIndex }, i) => (
+                      <Row
+                        key={row[0]}
+                        row={row}
+                        rowValues={bodyRowObjects[i]}
+                        i={i}
+                        rowIndex={originalIndex}
+                        inputsRef={inputsRef}
+                        currentRowRef={currentRowRef}
+                        colsRef={colsRef}
+                        columns={columns}
+                        allRows={visibleBodyRows}
+                        onStartEdit={startDraft}
+                        onEndEdit={commitDraft}
+                      />
+                    ))}
+                  <TableFooter
+                    columns={columns}
+                    footer={footer}
+                    bodyRows={visibleBodyRows}
+                  />
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>

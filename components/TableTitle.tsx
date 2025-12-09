@@ -41,10 +41,10 @@ export function TableTitle({
   };
 
   return (
-    <div className="flex items-center gap-2 min-w-5">
+    <div className="flex mb-3 items-center gap-2 min-w-5">
       <input
         ref={ref}
-        className="font-bold bg-transparent w-full min-w-0 border-gray-300 focus:outline-none focus:border-gray-500"
+        className="font-bold text-2xl bg-transparent w-full min-w-full border-gray-300 focus:outline-none focus:border-gray-500"
         value={name}
         onChange={(e) => setName(e.target.value)}
         onBlur={(e) => save(e.target.value)}
