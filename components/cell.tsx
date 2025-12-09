@@ -181,7 +181,7 @@ export function Cell({
   };
 
   useEffect(() => {
-    if (j === 0 && currentRowRef.current === i) {
+    if (j === 1 && currentRowRef.current === i) {
       inputsRef.current[i]?.[j]?.focus();
     }
   }, [currentRowRef, i, inputsRef, j]);

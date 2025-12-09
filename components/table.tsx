@@ -584,22 +584,26 @@ export function Table({
             <thead className="top-0 sticky bg-gray-100">
               <tr className="">
                 {columns.map((c, i) => (
-                  <Header
-                    colsRef={colsRef}
-                    i={i}
-                    c={c}
-                    key={`c-${i}`}
-                    currentRowRef={currentRowRef}
-                    columns={columns}
-                    currentColRef={currentColRef}
-                  />
+                  <>
+                    {i !== 0 && (
+                      <Header
+                        colsRef={colsRef}
+                        i={i}
+                        c={c}
+                        key={`c-${i}`}
+                        currentRowRef={currentRowRef}
+                        columns={columns}
+                        currentColRef={currentColRef}
+                      />
+                    )}
+                  </>
                 ))}
               </tr>
             </thead>
             <tbody className="bg-white">
               {visibleRows.map(({ row, originalIndex }, i) => (
                 <Row
-                  key={`row-${i}`}
+                  key={row[0]}
                   row={row}
                   rowValues={bodyRowObjects[i]}
                   i={i}

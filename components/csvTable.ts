@@ -5,9 +5,9 @@ const escapeCell = (cell: string) => {
 };
 
 export const initialCsv = [
-  ["Col1", "Col2"],
-  ["A", "B"],
-  ["", ""],
+  ["id", "Col1", "Col2"],
+  [crypto.randomUUID(), "A", "B"],
+  ["", "", ""],
 ]
   .map((row) => row.map(escapeCell).join(","))
   .join("\n");
@@ -90,7 +90,9 @@ export const ensureRowLength = (
 export const createEmptyRow = (table: string[][]): string[] => {
   const template =
     table[1] ?? (table[0] ? ensureRowLength([], table[0].length) : []);
-  return template.map((c) => (c.match(/^% /) ? c : ""));
+  return template.map((c, i) =>
+    i === 0 ? crypto.randomUUID() : c.match(/^% /) ? c : ""
+  );
 };
 
 export const extractColumns = (table: string[][]): string[] =>
