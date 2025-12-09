@@ -492,7 +492,7 @@ export function Table({
         </div>
       </div>
       <div className="flex animate-fade items-start w-screen justify-center h-[calc(100vh-40px)]">
-        <div className="mx-auto min-w-[400px] bg-white p-2 sm:p-4 md:p-10">
+        <div className="mx-auto min-w-[300px] sm:min-w-[600px] bg-white p-4 md:p-10">
           <div className="flex justify-between items-center gap-3">
             <TableTitle id={tableId!} initialName={initialName} />
             {suggestOpen && suggestions.length ? (
@@ -604,7 +604,7 @@ export function Table({
             <div className="overflow-scroll w-full">
               <table
                 key={tableId}
-                className="border-l border-t border-b border-gray-200 min-w-[400px]"
+                className="border-l border-t border-b border-gray-200 min-w-[300px] sm:min-w-[600px]"
               >
                 <thead className="top-0 sticky bg-gray-100">
                   <tr className="">
