@@ -6,5 +6,20 @@ body {
     Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji",
     "Segoe UI Symbol";
   font-weight: 500;
-  @apply text-gray-950
+  @apply text-gray-950;
+}
+
+.animate-fade {
+  animation: fade-in 0.3s;
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

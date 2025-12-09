@@ -41,7 +41,7 @@ export function TableTitle({
   };
 
   return (
-    <div className="flex mb-3 items-center gap-2 min-w-5">
+    <div className="flex mb-3 w-full items-center gap-2 min-w-5">
       <input
         ref={ref}
         className="font-bold text-2xl bg-transparent w-full min-w-full border-gray-300 focus:outline-none focus:border-gray-500"

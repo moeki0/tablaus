@@ -491,7 +491,7 @@ export function Table({
           <SignInOutButton />
         </div>
       </div>
-      <div className="flex items-start w-screen justify-center h-[calc(100vh-40px)]">
+      <div className="flex animate-fade items-start w-screen justify-center h-[calc(100vh-40px)]">
         <div className="mx-auto min-w-[400px] bg-white p-2 sm:p-4 md:p-10">
           <div className="flex justify-between items-center gap-3">
             <TableTitle id={tableId!} initialName={initialName} />
@@ -589,7 +589,7 @@ export function Table({
                     !e.target.value.trim() && suggestions.length > 0
                   );
                 }}
-                className="flex-1 w-full text-gray-600 bg-transparent px-1 py-1 outline-0"
+                className="flex-1 w-full text-gray-600 bg-transparent py-1 outline-0"
                 aria-label="Query"
                 ref={mergedQueryRef}
                 {...getSuggestRefProps({
