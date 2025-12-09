@@ -299,8 +299,10 @@ export function Cell({
               }
               if (
                 (e.key === "Delete" || e.key === "Backspace") &&
-                j === 0 &&
-                columns.every((col) => !rowValues[col])
+                j === 1 &&
+                columns
+                  .filter((c, j) => j !== 0)
+                  .every((col) => !rowValues[col])
               ) {
                 e.preventDefault();
                 if (csv.length === 3) {
