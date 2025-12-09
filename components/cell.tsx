@@ -368,7 +368,7 @@ export function Cell({
                 if (i <= rows.length - 1 && j < columns.length - 1) {
                   inputsRef.current[i]?.[j + 1]?.focus();
                 } else if (i < rows.length - 1) {
-                  inputsRef.current[i + 1]?.[0]?.focus();
+                  inputsRef.current[i + 1]?.[1]?.focus();
                 } else {
                   setCsv((csv) => {
                     const table = parseCsv(csv);
