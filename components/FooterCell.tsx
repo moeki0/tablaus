@@ -1,6 +1,9 @@
+/* eslint-disable react-hooks/refs */
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { useFloating } from "@floating-ui/react";
 import * as autosizeInput from "autosize-input";
 import { evaluateFormulaContent, stringifyFormulaValue } from "./formula";
 import { parseCsv, stringifyCsv, ensureRowLength } from "./csvTable";
@@ -24,6 +27,12 @@ export function FooterCell({
   const [editing, setEditing] = useState(false);
   const ref = useRef<HTMLTableCellElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { refs, floatingStyles } = useFloating({
+    placement: "top-start",
+  });
+  const [completion, setCompletion] = useState(false);
+  const [highlight, setHighlight] = useState<number | null>(null);
+  const suggestions = useMemo(() => ["% count()", "% sum()"], []);
 
   const rowObjects = useMemo(
     () =>
@@ -64,35 +73,97 @@ export function FooterCell({
     return <></>;
   }
 
+  const updateFooterValue = (newValue: string) => {
+    setCsv((csv) => {
+      const table = parseCsv(csv);
+      const footerIndex = table.length - 1;
+      table[footerIndex] = ensureRowLength(table[footerIndex], columns.length);
+      table[footerIndex][i] = newValue;
+      return stringifyCsv(table);
+    });
+  };
+
   return (
-    <td>
+    <td ref={refs.setReference}>
       <input
         ref={inputRef}
         onBlur={() => {
           setEditing(false);
           commitDraft();
+          setCompletion(false);
+          setHighlight(null);
         }}
         onFocus={() => {
           setEditing(true);
           startDraft();
+          const shouldComplete = !value;
+          setCompletion(shouldComplete);
+          setHighlight(shouldComplete ? 0 : null);
         }}
         className={`px-2 py-1 border-r border-gray-200 border-t ${
           editing ? "font-mono bg-white" : "bg-gray-100"
         } outline-0 min-w-full min-h-9`}
         value={editing ? value : result}
+        onKeyDown={(e) => {
+          if (completion && suggestions.length > 0 && e.key === "Tab") {
+            e.preventDefault();
+            setHighlight((prev) => {
+              if (prev === null) return 0;
+              const next = e.shiftKey
+                ? (prev - 1 + suggestions.length) % suggestions.length
+                : (prev + 1) % suggestions.length;
+              return next;
+            });
+            return;
+          }
+          if (completion && highlight !== null && e.key === "Enter") {
+            e.preventDefault();
+            const chosen = suggestions[highlight];
+            updateFooterValue(chosen);
+            setCompletion(false);
+            setHighlight(null);
+            inputRef.current?.focus();
+            return;
+          }
+          if (e.key === "Escape") {
+            setCompletion(false);
+            setHighlight(null);
+          }
+        }}
         onChange={(e) => {
-          setCsv((csv) => {
-            const table = parseCsv(csv);
-            const footerIndex = table.length - 1;
-            table[footerIndex] = ensureRowLength(
-              table[footerIndex],
-              columns.length
-            );
-            table[footerIndex][i] = e.target.value;
-            return stringifyCsv(table);
-          });
+          const newValue = e.target.value;
+          const shouldComplete = newValue === "";
+          setCompletion(shouldComplete);
+          setHighlight(shouldComplete ? 0 : null);
+          updateFooterValue(newValue);
         }}
       />
+      {completion &&
+        editing &&
+        createPortal(
+          <div ref={refs.setFloating} style={floatingStyles}>
+            <div className=" text-white font-mono text-xs rounded overflow-hidden flex">
+              {suggestions.map((suggestion, idx) => (
+                <button
+                  key={`footer-c-${idx}`}
+                  className={`px-3 cursor-pointer hover:bg-gray-700 z-50 py-0.5 ${
+                    highlight === idx ? "bg-gray-700 underline" : "bg-gray-900"
+                  }`}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    updateFooterValue(suggestion);
+                    setCompletion(false);
+                    setHighlight(null);
+                    inputRef.current?.focus();
+                  }}
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
+          </div>,
+          document.body
+        )}
     </td>
   );
 }
