@@ -309,7 +309,8 @@ export function Cell({
                 j === 1 &&
                 columns
                   .filter((c, j) => j !== 0)
-                  .every((col) => !rowValues[col])
+                  .every((col) => !rowValues[col]) &&
+                rows.length > 1
               ) {
                 e.preventDefault();
                 if (csv.length === 3) {
