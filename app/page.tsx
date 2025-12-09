@@ -70,7 +70,7 @@ export default async function HomePage() {
 
   return (
     <main className="">
-      <div className="flex flex-wrap items-center gap-3 px-2 py-1 border-b border-gray-200 shadow bg-white">
+      <div className="flex sticky top-0 z-10 flex-wrap items-center gap-3 px-2 py-1 border-b border-gray-200 bg-white">
         <div className="flex items-center gap-3">
           <Link href="/" className="hover:opacity-90 rounded transition">
             <Image alt="Tablaus" src="/tablaus.png" width={20} height={20} />
@@ -87,7 +87,7 @@ export default async function HomePage() {
         </div>
       </div>
 
-      <div className="bg-gray-50 flex w-screen h-[calc(100vh-40px)] overflow-scroll max-w-full">
+      <div className="bg-gray-50 flex w-screen max-w-full">
         <div className="w-screen bg-gray-50 rounded h-full overflow-scroll">
           <table className="min-w-full border-x border-gray-200">
             <thead className="sticky top-0 bg-gray-100 border-b border-gray-200">
