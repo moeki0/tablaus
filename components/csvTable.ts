@@ -6,7 +6,7 @@ const escapeCell = (cell: string) => {
 
 export const initialCsv = [
   ["id", "Col1", "Col2"],
-  [crypto.randomUUID(), "A", "B"],
+  [crypto.randomUUID().replaceAll(/-/g, ""), "A", "B"],
   ["", "", ""],
 ]
   .map((row) => row.map(escapeCell).join(","))
@@ -91,7 +91,7 @@ export const createEmptyRow = (table: string[][]): string[] => {
   const template =
     table[1] ?? (table[0] ? ensureRowLength([], table[0].length) : []);
   return template.map((c, i) =>
-    i === 0 ? crypto.randomUUID() : c.match(/^% /) ? c : ""
+    i === 0 ? crypto.randomUUID().replaceAll(/-/g, "") : c.match(/^% /) ? c : ""
   );
 };
 
