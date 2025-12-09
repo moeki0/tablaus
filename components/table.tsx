@@ -324,7 +324,13 @@ export function Table({
     }, filtered);
 
     return sorted;
-  }, [columns, parsedQuery, rawBodyRows]);
+  }, [
+    columns,
+    parsedQuery.filters,
+    parsedQuery.sorts,
+    rawBodyRows,
+    rowsForEval,
+  ]);
 
   const visibleBodyRows = useMemo(
     () => visibleRows.map((v) => v.row),
@@ -580,7 +586,7 @@ export function Table({
       </div>
       <div className="bg-gray-50 flex w-screen h-[calc(100vh-40px)] overflow-scroll max-w-full">
         <div className="w-screen bg-gray-50  h-full overflow-scroll">
-          <table className="border-b border-gray-200">
+          <table key={tableId} className="border-b border-gray-200">
             <thead className="top-0 sticky bg-gray-100">
               <tr className="">
                 {columns.map((c, i) => (
@@ -601,22 +607,24 @@ export function Table({
               </tr>
             </thead>
             <tbody className="bg-white">
-              {visibleRows.map(({ row, originalIndex }, i) => (
-                <Row
-                  key={row[0]}
-                  row={row}
-                  rowValues={bodyRowObjects[i]}
-                  i={i}
-                  rowIndex={originalIndex}
-                  inputsRef={inputsRef}
-                  currentRowRef={currentRowRef}
-                  colsRef={colsRef}
-                  columns={columns}
-                  allRows={visibleBodyRows}
-                  onStartEdit={startDraft}
-                  onEndEdit={commitDraft}
-                />
-              ))}
+              {visibleRows
+                .filter((r) => r.row[0])
+                .map(({ row, originalIndex }, i) => (
+                  <Row
+                    key={row[0]}
+                    row={row}
+                    rowValues={bodyRowObjects[i]}
+                    i={i}
+                    rowIndex={originalIndex}
+                    inputsRef={inputsRef}
+                    currentRowRef={currentRowRef}
+                    colsRef={colsRef}
+                    columns={columns}
+                    allRows={visibleBodyRows}
+                    onStartEdit={startDraft}
+                    onEndEdit={commitDraft}
+                  />
+                ))}
               <TableFooter
                 columns={columns}
                 footer={footer}
