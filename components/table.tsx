@@ -579,7 +579,7 @@ export function Table({
             </div>
           </div>
           <div className="w-auto max-w-none flex flex-col">
-            <div className="flex flex-1 items-center gap-2 bg-white pl-2 border-t border-l w-full border-r border-gray-200">
+            <div className="flex flex-1 items-center gap-2 bg-white pl-2 border w-full border-gray-200">
               <FiFilter className="stroke-gray-500" size={14} />
               <input
                 value={querySpec}
