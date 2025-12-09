@@ -196,13 +196,16 @@ export function Cell({
   useEffect(() => {
     if (inputsRef.current[i]?.[j]) {
       inputsRef.current[i]![j]!.classList.add(
-        value?.match(/\[[x ]\]/) || value?.match(/^% /)
-          ? "font-mono"
-          : "font-sans"
+        isEditing && value?.match(/^% /) ? "font-mono" : "font-inherit"
       );
+      if (isEditing && value?.match(/^% /)) {
+        inputsRef.current[i]![j]!.classList.add("text-sky-900");
+      } else {
+        inputsRef.current[i]![j]!.classList.remove("text-sky-900");
+      }
       autosizeInput(inputsRef.current[i]![j]);
     }
-  }, [i, inputsRef, j, value]);
+  }, [i, inputsRef, isEditing, j, value]);
 
   return (
     <>
@@ -223,7 +226,7 @@ export function Cell({
             }}
             className={`px-2 py-1 ${
               value !== displayValue && isEditing ? "font-mono" : ""
-            } ${!isEditing && "font-sans!"} outline-0 min-w-full ${
+            } outline-0 min-w-full ${
               !(!buttonAction || isEditing) && "hidden"
             }`}
             value={isEditing ? value : displayValue || ""}
