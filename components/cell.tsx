@@ -22,6 +22,7 @@ import type { RowValues } from "./row";
 import { useAtom } from "jotai";
 import { tableAtom } from "./dataAtom";
 import { dateFormats, dateTimeFormats, timeFormats } from "./date-formats";
+import { FiExternalLink, FiLink } from "react-icons/fi";
 
 const parseDateValue = (
   value: string
@@ -217,7 +218,7 @@ export function Cell({
     <>
       <td
         ref={refs.setReference}
-        className="border-r border-gray-200"
+        className="border-r border-gray-200 relative"
         onClick={() => {
           setIsEditing(true);
         }}
@@ -232,9 +233,11 @@ export function Cell({
             }}
             className={`px-2 py-1 ${
               value !== displayValue && isEditing ? "font-mono" : ""
-            } outline-0 min-w-full ${
-              !(!buttonAction || isEditing) && "hidden"
-            }`}
+            } outline-0 ${
+              displayValue?.match(/^https?:\/\/.+\..+/)
+                ? "min-w-[calc(100% - 40px)]"
+                : `min-w-full`
+            } ${!(!buttonAction || isEditing) && "hidden"}`}
             value={isEditing ? value : displayValue || ""}
             onFocus={() => {
               onStartEdit?.();
@@ -448,6 +451,15 @@ export function Cell({
           >
             {buttonAction.label}
           </button>
+        )}
+        {displayValue?.match(/^https?:\/\/.+\..+/) && (
+          <a
+            href={displayValue}
+            target="_blank"
+            className="absolute right-1.5 top-1/2 -translate-y-1/2"
+          >
+            <FiExternalLink />{" "}
+          </a>
         )}
       </td>
       {completion && (
