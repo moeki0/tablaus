@@ -91,7 +91,7 @@ export function Cell({
   const [completion, setCompletion] = useState(false);
   const columnName = columns[j];
   const values = _.uniq(rows.map((r) => r[j]).filter((r, k) => k !== i));
-  const nextDate: string | null = useMemo(() => {
+  const dates: string[] | null = useMemo(() => {
     const v = rows[i - 1]?.[j];
     if (!v) {
       return null;
@@ -100,15 +100,18 @@ export function Cell({
     if (!parsed) {
       return null;
     }
-    return format(addDays(parsed.date, 1), parsed.output);
+    return [
+      format(new Date(), parsed.output),
+      format(addDays(parsed.date, 1), parsed.output),
+    ];
   }, [i, j, rows]);
   const allValues = useMemo(() => {
     let v = values.filter((v) => v);
-    if (nextDate !== null) {
-      v = [nextDate];
+    if (dates !== null) {
+      v = [...dates];
     }
     return v;
-  }, [values, nextDate]);
+  }, [values, dates]);
   const [com, setCom] = useState<number | null>(null);
 
   const rowsForEval = useMemo(

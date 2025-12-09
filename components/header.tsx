@@ -49,9 +49,9 @@ export function Header({
   }, [colsRef, currentColRef, i, c, columns]);
 
   return (
-    <th className="border-b border-r border-gray-200">
+    <th className="border-b border-r border-gray-200 min-w-10">
       <input
-        className="px-2 py-1 outline-0 min-w-5 font-semibold text-gray-800"
+        className="px-2 py-1 outline-0 min-w-full font-semibold text-gray-800"
         ref={(el) => {
           colsRef.current[i] = el;
         }}
