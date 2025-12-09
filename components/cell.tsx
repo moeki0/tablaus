@@ -209,6 +209,10 @@ export function Cell({
     }
   }, [i, inputsRef, isEditing, j, value]);
 
+  if (j === 0) {
+    return <></>;
+  }
+
   return (
     <>
       <td

@@ -590,19 +590,15 @@ export function Table({
             <thead className="top-0 sticky bg-gray-100">
               <tr className="">
                 {columns.map((c, i) => (
-                  <>
-                    {i !== 0 && (
-                      <Header
-                        colsRef={colsRef}
-                        i={i}
-                        c={c}
-                        key={`c-${i}`}
-                        currentRowRef={currentRowRef}
-                        columns={columns}
-                        currentColRef={currentColRef}
-                      />
-                    )}
-                  </>
+                  <Header
+                    colsRef={colsRef}
+                    i={i}
+                    c={c}
+                    key={`c-${i}`}
+                    currentRowRef={currentRowRef}
+                    columns={columns}
+                    currentColRef={currentColRef}
+                  />
                 ))}
               </tr>
             </thead>

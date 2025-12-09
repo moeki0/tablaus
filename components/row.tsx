@@ -37,26 +37,22 @@ export function Row({
   return (
     <tr className="border-t hover:bg-gray-50 border-gray-200" id={row[0]}>
       {columns.map((c, j) => (
-        <>
-          {j !== 0 && (
-            <Cell
-              inputsRef={inputsRef}
-              key={`cell-${j}`}
-              value={row[j] ?? ""}
-              j={j}
-              i={i}
-              rowIndex={rowIndex}
-              currentRowRef={currentRowRef}
-              colsRef={colsRef}
-              columns={columns}
-              rows={allRows}
-              rowValues={rowValues}
-              onStartEdit={onStartEdit}
-              onEndEdit={onEndEdit}
-              tableLookup={tableLookup}
-            />
-          )}
-        </>
+        <Cell
+          inputsRef={inputsRef}
+          key={`cell-${j}`}
+          value={row[j] ?? ""}
+          j={j}
+          i={i}
+          rowIndex={rowIndex}
+          currentRowRef={currentRowRef}
+          colsRef={colsRef}
+          columns={columns}
+          rows={allRows}
+          rowValues={rowValues}
+          onStartEdit={onStartEdit}
+          onEndEdit={onEndEdit}
+          tableLookup={tableLookup}
+        />
       ))}
     </tr>
   );

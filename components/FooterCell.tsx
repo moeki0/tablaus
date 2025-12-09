@@ -60,6 +60,10 @@ export function FooterCell({
     autosizeInput(inputRef.current);
   }, [editing, result]);
 
+  if (i === 0) {
+    return <></>;
+  }
+
   return (
     <td>
       <input

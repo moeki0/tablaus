@@ -33,6 +33,9 @@ export function Header({
   const prevColumns = useRef<string[]>(null);
 
   useEffect(() => {
+    if (!colsRef.current[i]) {
+      return;
+    }
     autosizeInput(colsRef.current[i]);
   }, [colsRef, i, c]);
 
@@ -47,6 +50,10 @@ export function Header({
       prevColumns.current = columns;
     }
   }, [colsRef, currentColRef, i, c, columns]);
+
+  if (i === 0) {
+    return <></>;
+  }
 
   return (
     <th className="border-b border-r border-gray-200 min-w-10">

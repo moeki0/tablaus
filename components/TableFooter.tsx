@@ -14,17 +14,13 @@ export function TableFooter({
   return (
     <tr className="sticky bottom-0 border-gray-200">
       {columns.map((c, i) => (
-        <>
-          {i !== 0 && (
-            <FooterCell
-              key={`c-${i}`}
-              i={i}
-              value={footer[i] ?? ""}
-              columns={columns}
-              bodyRows={bodyRows}
-            />
-          )}
-        </>
+        <FooterCell
+          key={`c-${i}`}
+          i={i}
+          value={footer[i] ?? ""}
+          columns={columns}
+          bodyRows={bodyRows}
+        />
       ))}
     </tr>
   );
