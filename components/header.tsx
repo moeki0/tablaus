@@ -99,7 +99,7 @@ export function Header({
                 table.length > 0
                   ? table
                   : [createEmptyRow(table), createEmptyRow(table)];
-              rows = rows.map((r) => r.filter((c, j) => j !== i)).slice(1);
+              rows = rows.map((r) => r.filter((c, j) => j !== i));
               return stringifyCsv(rows);
             });
             if (colsRef.current) {
