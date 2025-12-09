@@ -493,7 +493,7 @@ export function Table({
       </div>
       <div className="flex items-start w-screen justify-center h-[calc(100vh-40px)]">
         <div className="mx-auto min-w-[400px] bg-white p-2 sm:p-4 md:p-10">
-          <div className="flex items-center gap-3">
+          <div className="flex justify-between items-center gap-3">
             <TableTitle id={tableId!} initialName={initialName} />
             {suggestOpen && suggestions.length ? (
               <div
