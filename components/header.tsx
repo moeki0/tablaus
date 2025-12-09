@@ -137,6 +137,15 @@ export function Header({
               currentColRef.current = i + 1;
             }
           }
+          if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+            setCsv((csv) => {
+              const table = parseCsv(csv);
+              const newRow = createEmptyRow(table);
+              table.splice(1, 0, newRow);
+              return stringifyCsv(table);
+            });
+            currentRowRef.current = 0;
+          }
         }}
       />
     </th>
