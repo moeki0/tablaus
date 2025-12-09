@@ -606,7 +606,7 @@ export function Table({
                 ))}
               </tr>
             </thead>
-            <tbody className="bg-white">
+            <tbody className="bg-white" key={tableId}>
               {visibleRows
                 .filter((r) => r.row[0])
                 .map(({ row, originalIndex }, i) => (
